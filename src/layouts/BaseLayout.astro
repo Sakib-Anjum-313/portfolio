@@ -4,7 +4,7 @@ import "@fontsource-variable/jetbrains-mono";
 import "../styles/global.css";
 import interLatin from "@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url";
 import { ClientRouter } from "astro:transitions";
-import { site, nav as navLinks } from "../data/site";
+import { site, nav as navLinks, withBase } from "../data/site";
 import CopyEmail from "../components/ui/CopyEmail.astro";
 
 interface Props {
@@ -16,6 +16,7 @@ const pageTitle = title ? `${title} · ${site.name}` : site.name;
 
 const { email, linkedin, github, resume } = site;
 
+const home = withBase("/");
 const path = Astro.url.pathname.replace(/\/$/, "");
 const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`);
 
@@ -29,8 +30,8 @@ const linkClass =
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
-    <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png" />
-    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" type="image/png" sizes="64x64" href={withBase("/favicon.png")} />
+    <link rel="icon" href={withBase("/favicon.ico")} sizes="32x32" />
     <title>{pageTitle}</title>
     <!-- The headline's height changes when Inter swaps in, so have it ready for first paint. -->
     <link rel="preload" href={interLatin} as="font" type="font/woff2" crossorigin />
@@ -55,9 +56,9 @@ const linkClass =
         class="mx-auto flex h-full w-full max-w-6xl flex-wrap content-center items-center justify-between gap-x-8 gap-y-2 px-6 md:px-10"
       >
         <a
-          href="/"
+          href={home}
           class="font-semibold tracking-tight text-text"
-          aria-current={path === "" ? "page" : undefined}
+          aria-current={path === home.replace(/\/$/, "") ? "page" : undefined}
         >
           {site.name}
         </a>

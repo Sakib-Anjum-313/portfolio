@@ -14,6 +14,7 @@ import AttendanceScene from "../../components/scenes/AttendanceScene.astro";
 import ForYouScene from "../../components/scenes/ForYouScene.astro";
 import CfErpScene from "../../components/scenes/CfErpScene.astro";
 import { forYouAfter } from "../../components/diagrams/specs";
+import { withBase } from "../../data/site";
 
 export async function getStaticPaths() {
   const work = (await getCollection("work")).sort((a, b) => a.data.order - b.data.order);
@@ -58,7 +59,7 @@ const prose = "max-w-[65ch]";
   <article>
     <header class:list={[wide, "pt-16 md:pt-24"]}>
       <p class="font-mono text-xs uppercase tracking-[0.18em]">
-        <a href="/work" class="text-accent hover:text-text focus-visible:text-text">Work</a>
+        <a href={withBase("/work")} class="text-accent hover:text-text focus-visible:text-text">Work</a>
       </p>
       <h1 transition:name={`work-title-${entry.id}`} class="mt-6 text-4xl font-semibold tracking-[-0.02em] md:text-5xl">
         {data.title}
@@ -218,7 +219,7 @@ const prose = "max-w-[65ch]";
     <section class:list={[wide, "py-24"]}>
       <SectionLabel name="Next case study" />
       <p class="mt-4 text-2xl font-semibold tracking-[-0.02em]">
-        <ArrowLink href={`/work/${next.id}`}>{next.data.title}</ArrowLink>
+        <ArrowLink href={withBase(`/work/${next.id}`)}>{next.data.title}</ArrowLink>
       </p>
     </section>
   </article>

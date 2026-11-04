@@ -1,3 +1,6 @@
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+export const withBase = (path: string) => `${base}${path}`;
+
 export const site = {
   name: "Sakib Anjum",
   role: "Full Stack Engineer & Team Lead",
@@ -6,14 +9,14 @@ export const site = {
   email: "sakibanjum.313@gmail.com",
   linkedin: "https://linkedin.com/in/sakib-anjum-cse",
   github: "https://github.com/Sakib-Anjum-313",
-  resume: "/Sakib_Anjum_Resume.pdf",
+  resume: withBase("/Sakib_Anjum_Resume.pdf"),
   positioning: "I turn complex business operations into reliable software systems.",
 } as const;
 
 export const nav = [
-  { label: "Work", href: "/work" },
-  { label: "Experience", href: "/experience" },
-  { label: "AI Workflow", href: "/ai-workflow" },
+  { label: "Work", href: withBase("/work") },
+  { label: "Experience", href: withBase("/experience") },
+  { label: "AI Workflow", href: withBase("/ai-workflow") },
 ] as const;
 
 export const hero = {
@@ -21,7 +24,7 @@ export const hero = {
   subline:
     "Full Stack Engineer and Team Lead. I model how a business actually works, then build systems that hold up under load, failure and messy data.",
   availability: "Open to remote · UTC+6",
-  primaryCta: { label: "See the systems", href: "/work" },
+  primaryCta: { label: "See the systems", href: withBase("/work") },
   secondaryCta: { label: "Download resume", href: site.resume },
 } as const;
 

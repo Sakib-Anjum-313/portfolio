@@ -11,6 +11,7 @@ import AiWorkflowTeaser from "../components/sections/AiWorkflowTeaser.astro";
 import ContactCta from "../components/sections/ContactCta.astro";
 import SectionLabel from "../components/ui/SectionLabel.astro";
 import ArrowLink from "../components/ui/ArrowLink.astro";
+import { withBase } from "../data/site";
 ---
 
 <BaseLayout>
@@ -26,7 +27,7 @@ import ArrowLink from "../components/ui/ArrowLink.astro";
       <ExperienceList compact />
     </div>
     <p class="mt-8">
-      <ArrowLink href="/experience">Full experience</ArrowLink>
+      <ArrowLink href={withBase("/experience")}>Full experience</ArrowLink>
     </p>
   </section>
   <AiWorkflowTeaser />

@@ -3,6 +3,7 @@ import { aiWorkflow, principles } from "../../data/ai-workflow";
 import SectionLabel from "../ui/SectionLabel.astro";
 import ArrowLink from "../ui/ArrowLink.astro";
 import AgentLoopScene from "../scenes/AgentLoopScene.astro";
+import { withBase } from "../../data/site";
 ---
 
 <section class="mx-auto w-full max-w-6xl px-6 py-24 md:px-10 md:py-32">
@@ -27,7 +28,7 @@ import AgentLoopScene from "../scenes/AgentLoopScene.astro";
         {aiWorkflow.certification}
       </p>
       <p class="mt-8">
-        <ArrowLink href="/ai-workflow">How I build with AI</ArrowLink>
+        <ArrowLink href={withBase("/ai-workflow")}>How I build with AI</ArrowLink>
       </p>
     </div>
     <AgentLoopScene />

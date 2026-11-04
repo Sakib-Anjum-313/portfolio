@@ -6,6 +6,7 @@ import Pill from "../../components/ui/Pill.astro";
 import FlowDiagram from "../../components/diagrams/FlowDiagram.astro";
 import { miniPush, miniAttendance, miniForYou, miniCfErp } from "../../components/diagrams/specs";
 import type { FlowSpec } from "../../components/diagrams/specs";
+import { withBase } from "../../data/site";
 
 const work = (await getCollection("work")).sort((a, b) => a.data.order - b.data.order);
 const filters = ["All", "Backend", "Full stack", "Integrations"];
@@ -45,7 +46,7 @@ const previews: Record<string, FlowSpec> = {
           work.map((entry, i) => (
             <li data-category={entry.data.category.join("|")} data-slug={entry.id} class="border-b border-line">
               <a
-                href={`/work/${entry.id}`}
+                href={withBase(`/work/${entry.id}`)}
                 class="group grid gap-6 py-8 transition-colors hover:bg-ink-900/70 focus-visible:bg-ink-900/70 md:grid-cols-[3rem_1fr_16rem] md:px-4"
               >
                 <p class="font-mono text-sm tabular-nums text-muted">{String(i + 1).padStart(2, "0")}</p>
@@ -69,7 +70,7 @@ const previews: Record<string, FlowSpec> = {
                   </ul>
                 </div>
                 <img
-                  src={entry.data.cover}
+                  src={withBase(entry.data.cover)}
                   alt={`Blueprint cover for ${entry.data.title}`}
                   width="800"
                   height="450"

@@ -5,6 +5,7 @@ import Card from "../ui/Card.astro";
 import MetricBadge from "../ui/MetricBadge.astro";
 import FlowDiagram from "../diagrams/FlowDiagram.astro";
 import { miniPush, miniAttendance, miniForYou } from "../diagrams/specs";
+import { withBase } from "../../data/site";
 
 const featured = [
   { slug: "push-pipeline", spec: miniPush, caption: "A request enters a queue and workers drain it." },
@@ -27,7 +28,7 @@ const entries = await Promise.all(
     {
       entries.map(({ entry, spec, caption }) => (
         <li data-part="system-card">
-          <Card href={`/work/${entry.id}`} class="flex h-full flex-col gap-6">
+          <Card href={withBase(`/work/${entry.id}`)} class="flex h-full flex-col gap-6">
             <h3
               transition:name={`work-title-${entry.id}`}
               class="text-xl font-semibold tracking-[-0.02em] group-hover:text-accent group-focus-visible:text-accent"

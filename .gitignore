@@ -17,8 +17,14 @@ pnpm-debug.log*
 .env
 .env.production
 
+# vercel
+.vercel
+
 # macOS-specific files
 .DS_Store
 
 # jetbrains setting folder
 .idea/
+
+# off-limits real project screenshots (v1)
+public/my-projects-screenshot/

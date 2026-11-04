@@ -5,6 +5,8 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
+  site: 'https://sakib-anjum-313.github.io',
+  base: '/portfolio',
   output: 'static',
   integrations: [mdx()],
   vite: {
