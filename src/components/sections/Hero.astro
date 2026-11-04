@@ -1,33 +1,38 @@
 ---
 import { hero } from "../../data/site";
 import Button from "../ui/Button.astro";
-import HeroDiagram from "../diagrams/HeroDiagram.astro";
+import HeroScene from "../scenes/HeroScene.astro";
 ---
 
-<section class="mx-auto w-full max-w-6xl px-6 py-24 md:px-10 md:py-32">
-  <div class="grid items-center gap-16 lg:grid-cols-[1.15fr_0.85fr]">
-    <div>
-      <p
-        class="inline-flex items-center gap-2 rounded-full border border-line px-3 py-1 font-mono text-xs text-muted"
-      >
-        <span class="size-1.5 rounded-full bg-ok" aria-hidden="true"></span>
-        {hero.availability}
-      </p>
-      <h1
-        class="mt-6 text-[clamp(2.5rem,6vw,4.75rem)] font-semibold leading-[1.05] tracking-[-0.03em]"
-      >
-        {hero.headline}
-      </h1>
-      <p class="mt-6 max-w-[65ch] text-lg text-muted">{hero.subline}</p>
-      <div class="mt-10 flex flex-wrap gap-4">
-        <Button href={hero.primaryCta.href}>{hero.primaryCta.label}</Button>
-        <Button href={hero.secondaryCta.href} variant="ghost" newTab>
-          {hero.secondaryCta.label}
-        </Button>
+<section data-scene="hero" class="relative isolate overflow-clip">
+  <div data-part="swarm" aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10"></div>
+  <div class="mx-auto w-full max-w-6xl px-6 py-24 md:px-10 md:py-32">
+    <div class="grid items-center gap-16 lg:grid-cols-[1.15fr_0.85fr]">
+      <div>
+        <p
+          class="inline-flex items-center gap-2 rounded-full border border-line px-3 py-1 font-mono text-xs text-muted"
+        >
+          <span class="size-1.5 rounded-full bg-ok" aria-hidden="true"></span>
+          {hero.availability}
+        </p>
+        <h1
+          data-part="headline"
+          data-prehide
+          class="mt-6 text-[clamp(2.5rem,6vw,4.75rem)] font-semibold leading-[1.05] tracking-[-0.03em]"
+        >
+          {hero.headline}
+        </h1>
+        <p class="mt-6 max-w-[65ch] text-lg text-muted">{hero.subline}</p>
+        <div class="mt-10 flex flex-wrap gap-4">
+          <Button href={hero.primaryCta.href}>{hero.primaryCta.label}</Button>
+          <Button href={hero.secondaryCta.href} variant="ghost" newTab>
+            {hero.secondaryCta.label}
+          </Button>
+        </div>
       </div>
-    </div>
-    <div class="flex justify-center lg:justify-end">
-      <HeroDiagram />
+      <div class="flex justify-center lg:justify-end">
+        <HeroScene />
+      </div>
     </div>
   </div>
 </section>

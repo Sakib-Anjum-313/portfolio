@@ -1,0 +1,81 @@
+---
+import FlowDiagram from "../diagrams/FlowDiagram.astro";
+import { agentLoop } from "../diagrams/specs";
+
+const tokens = [
+  { part: "feature", text: "feature", width: 68, stroke: "stroke-accent", fill: "fill-accent" },
+  { part: "assumption", text: "assumption", width: 84, stroke: "stroke-fail", fill: "fill-fail" },
+  { part: "verified", text: "verified", width: 72, stroke: "stroke-ok", fill: "fill-ok" },
+];
+---
+
+<div data-scene="agent-loop">
+  <FlowDiagram
+    id="agent-loop"
+    spec={agentLoop}
+    scroll
+    caption="Each change moves from context to plan, build and verify. A rejected assumption loops back to plan, and only a verified change reaches merge."
+  >
+    {
+      tokens.map((t) => (
+        <g data-part={t.part} class="opacity-0">
+          <rect x={-t.width / 2} y="-10" width={t.width} height="20" rx="10" stroke-width="1.25" class:list={["fill-ink-950", t.stroke]} />
+          <text y="4" text-anchor="middle" font-size="12" class:list={["font-mono", t.fill]}>{t.text}</text>
+          {t.part === "assumption" && (
+            <path data-part="strike" d={`M${-t.width / 2 + 6} 0 H${t.width / 2 - 6}`} fill="none" stroke-width="1.25" class="stroke-fail" />
+          )}
+        </g>
+      ))
+    }
+  </FlowDiagram>
+</div>
+
+<script>
+  import { gsap, MQ } from "../../lib/gsap";
+  import { onScene } from "../../lib/scene";
+
+  const X = { context: 42, plan: 150, build: 258, verify: 366, merge: 474 };
+  const Y = 78;
+
+  onScene("agent-loop", (root) => {
+    const q = gsap.utils.selector(root);
+    const mm = gsap.matchMedia();
+
+    mm.add(MQ.motion, () => {
+      const [feature] = q("[data-part=feature]");
+      const [assumption] = q("[data-part=assumption]");
+      const [verified] = q("[data-part=verified]");
+      const [rejected, verifiedNote] = q("[data-part=note]");
+      const [backEdge] = gsap.utils.toArray<SVGPathElement>('[data-from="verify"][data-to="plan"]', root);
+      const merge = q('[data-from="verify"][data-to="merge"], [data-node="merge"]');
+      // Narrow screens scroll this diagram sideways, so bring Verify and Merge into view.
+      const scroller = q(".overflow-x-auto")[0];
+      const reveal = () => scroller.scrollTo({ left: scroller.scrollWidth, behavior: "smooth" });
+
+      gsap.set(feature, { x: X.context, y: Y });
+      gsap.set(assumption, { x: X.verify, y: Y });
+      gsap.set(verified, { x: X.plan, y: Y });
+
+      gsap
+        .timeline({ scrollTrigger: { trigger: root, start: "top 75%", once: true } })
+        .call(reveal, undefined, 0.8)
+        .from(backEdge, { opacity: 0, duration: 0.3 }, 1.9)
+        .from(rejected, { opacity: 0, duration: 0.3 }, 1.9)
+        .from(verifiedNote, { opacity: 0, duration: 0.3 }, 4.8)
+        .from(merge, { opacity: 0.25, duration: 0.3 }, 4.5)
+        .to(feature, { opacity: 1, duration: 0.2 }, 0)
+        .to(feature, { keyframes: { x: [X.context, X.plan, X.build, X.verify] }, duration: 1.2, ease: "none" }, 0.1)
+        .to(feature, { opacity: 0, duration: 0.15 }, 1.3)
+        .to(assumption, { opacity: 1, duration: 0.15 }, 1.3)
+        .to(assumption, { keyframes: { x: [X.verify, X.verify + 4, X.verify - 4, X.verify + 4, X.verify] }, duration: 0.4, ease: "none" }, 1.5)
+        .from(q("[data-part=strike]"), { drawSVG: "0%", duration: 0.3 }, 1.8)
+        .to(assumption, { motionPath: { path: backEdge, align: backEdge, alignOrigin: [0.5, 0.5] }, duration: 1, ease: "power1.inOut" }, 2.2)
+        .to(assumption, { opacity: 0, duration: 0.2 }, 3.2)
+        .to(verified, { opacity: 1, duration: 0.2 }, 3.3)
+        .to(verified, { keyframes: { x: [X.plan, X.build, X.verify, X.merge] }, duration: 1.2, ease: "none" }, 3.4)
+        .to(verified, { opacity: 0, duration: 0.2 }, 4.7);
+    });
+
+    return () => mm.revert();
+  });
+</script>

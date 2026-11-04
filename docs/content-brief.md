@@ -12,7 +12,7 @@ Items marked `TODO(sakib)` are placeholders Sakib will refine later; build with 
 - **LinkedIn:** https://linkedin.com/in/sakib-anjum-cse
 - **GitHub:** https://github.com/Sakib-Anjum-313
 - **Resume:** `/Sakib_Anjum_Resume.pdf` (in `public/`)
-- **Photo:** `public/images/my-image.png` — 853×963 transparent-background cutout (arms crossed, dark green shirt). Use Astro `<Image>` (import from `src/assets/`) so it ships as an optimized WebP/AVIF at the size shown. Place it over the blueprint grid with a thin accent ring or arc behind the shoulders; no box or border around the cutout.
+- **Photo:** `src/assets/sakib-avatar.png` — avatar with its own gradient ring (glasses, black shirt, dark blue background, code symbol), the image Sakib supplied, unedited. He chose it on 2026-11-04 to replace the transparent cutout. Show the whole image as it is: no crop, no circular clip, no second ring. Use Astro `<Image>` so it ships as an optimized WebP/AVIF at the size shown. The favicon is a separate photo (green background), cropped to the head.
 - Phone number is intentionally **not** shown on the site.
 
 ## Positioning
@@ -199,7 +199,7 @@ I learned early that software only works when it matches how people actually wor
 
 ## Visual assets
 
-- `public/images/my-image.png` — Sakib's photo (transparent cutout). Copy into `src/assets/` for `<Image>` optimization.
+- `src/assets/sakib-avatar.png` — Sakib's avatar, used on the Experience page. The older transparent cutout (`public/images/my-image.png`) is no longer used.
 - `public/images/profile-placeholder.svg` — monogram fallback; not needed now that the photo exists.
 - `public/images/covers/*.svg` — blueprint placeholder covers per case study.
 - Real product screenshots exist in `../` (Govaly admin and website, SFI ERP screens). **Do not use them in v1.** They contain client names, employee names and financial figures. They can be added later only after blurring and the employer's OK.

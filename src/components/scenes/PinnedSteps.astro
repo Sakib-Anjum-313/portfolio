@@ -1,0 +1,23 @@
+---
+interface Props {
+  steps: readonly string[];
+}
+
+const { steps } = Astro.props;
+---
+
+<div class="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1fr)_15rem] lg:gap-12">
+  <div class="min-w-0 lg:sticky lg:top-8 lg:self-start">
+    <slot />
+  </div>
+  <ol class="space-y-6 lg:space-y-0">
+    {
+      steps.map((step, i) => (
+        <li data-step data-tall class="flex gap-4">
+          <span class="font-mono text-xs tabular-nums leading-7 text-accent">{String(i + 1).padStart(2, "0")}</span>
+          <p class="text-text">{step}</p>
+        </li>
+      ))
+    }
+  </ol>
+</div>

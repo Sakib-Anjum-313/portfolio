@@ -7,9 +7,13 @@ import MetricBadge from "../../components/ui/MetricBadge.astro";
 import ArrowLink from "../../components/ui/ArrowLink.astro";
 import SectionLabel from "../../components/ui/SectionLabel.astro";
 import FlowDiagram from "../../components/diagrams/FlowDiagram.astro";
-import LatencyBar from "../../components/diagrams/LatencyBar.astro";
-import { pushBefore, pushAfter, attendanceAfter, forYouAfter, cfErpAfter } from "../../components/diagrams/specs";
-import type { FlowSpec } from "../../components/diagrams/specs";
+import LatencyBar from "../../components/scenes/LatencyBar.astro";
+import PinnedSteps from "../../components/scenes/PinnedSteps.astro";
+import PushPipelineScene from "../../components/scenes/PushPipelineScene.astro";
+import AttendanceScene from "../../components/scenes/AttendanceScene.astro";
+import ForYouScene from "../../components/scenes/ForYouScene.astro";
+import CfErpScene from "../../components/scenes/CfErpScene.astro";
+import { forYouAfter } from "../../components/diagrams/specs";
 
 export async function getStaticPaths() {
   const work = (await getCollection("work")).sort((a, b) => a.data.order - b.data.order);
@@ -22,45 +26,23 @@ export async function getStaticPaths() {
 const { entry, next } = Astro.props;
 const { data } = entry;
 
-const diagrams: Record<
-  string,
-  { before?: { spec: FlowSpec; caption: string }; after: { spec: FlowSpec; caption: string } }
-> = {
-  "push-pipeline": {
-    before: {
-      spec: pushBefore,
-      caption:
-        "Before: requests hit one API that loops over users. The request blocks and Firebase answers with 429 Too Many Requests.",
-    },
-    after: {
-      spec: pushAfter,
-      caption:
-        "After: the API stores the job in a Redis queue and answers 202 Scheduled. Celery workers, backed by PostgreSQL, drain the queue and send to Firebase. Workers scale with load.",
-    },
-  },
-  "attendance-backend": {
-    after: {
-      spec: attendanceAfter,
-      caption:
-        "A terminal pushes to the PUSH receiver. One transaction stores an immutable raw event and a work item. A single advisory-locked worker turns it into a daily result, which feeds 7 reports. Bounded retry, crash recovery and a heartbeat protect the worker.",
-    },
-  },
-  "for-you": {
-    after: {
-      spec: forYouAfter,
-      caption:
-        "Search, view, cart, order and category signals, plus an admin boost, feed one hybrid score. The score orders the feed that one API serves to web and mobile.",
-    },
-  },
-  "cf-erp": {
-    after: {
-      spec: cfErpAfter,
-      caption:
-        "Jobs, vouchers, billing, accounts and HR are separate modules. A voucher posts an entry, and Ledger, Journal and Contra all derive from that same posted entry, so they agree.",
-    },
-  },
+const pushCaptions = {
+  before:
+    "Before: requests hit one API that loops over users. The request blocks and Firebase answers with 429 Too Many Requests.",
+  after:
+    "After: the API stores the job in a Redis queue and answers 202 Scheduled. Celery workers, backed by PostgreSQL, drain the queue and send to Firebase. Workers scale with load.",
 };
-const diagram = diagrams[entry.id];
+
+const attendanceCaption =
+  "A terminal pushes to the PUSH receiver. One transaction stores an immutable raw event and a work item. A single advisory-locked worker turns it into a daily result, which feeds 7 reports. Bounded retry, crash recovery and a heartbeat protect the worker. The calendar shows a placeholder month.";
+const attendanceSteps = [
+  "terminal → PUSH receiver → immutable raw event + work item (one transaction)",
+  "Device re-sends the same upload → exact replays deduplicated; device gets OK only after the batch commits.",
+  "single advisory-locked worker → daily result → 7 reports",
+  "Terminal offline, uploads hours later → late punches recalculate the finalized day.",
+];
+const forYouCaption =
+  "Search, view, cart, order and category signals, plus an admin boost, feed one hybrid score. The score orders the feed that one API serves to web and mobile.";
 
 // Decisions read "Lead: rest". Show the lead in bold when there is one.
 const splitDecision = (text: string) => {
@@ -133,16 +115,7 @@ const prose = "max-w-[65ch]";
         <section class:list={[wide, "pt-20"]}>
           <SectionLabel name="The problem" />
           <p class:list={["mt-4 text-muted", prose]}>{data.problem}</p>
-          {diagram?.before && (
-            <FlowDiagram
-              id={`${entry.id}-before`}
-              spec={diagram.before.spec}
-              caption={diagram.before.caption}
-              showCaption
-              scroll
-              class="mt-10"
-            />
-          )}
+          {entry.id === "push-pipeline" && <PushPipelineScene part="before" caption={pushCaptions.before} />}
         </section>
       )
     }
@@ -165,15 +138,37 @@ const prose = "max-w-[65ch]";
 
     <section class:list={[wide, "pt-20"]}>
       <SectionLabel name="The design" />
-      <p class:list={["mt-4 text-muted", prose]}>{data.design}</p>
-      <FlowDiagram
-        id={`${entry.id}-after`}
-        spec={diagram.after.spec}
-        caption={diagram.after.caption}
-        showCaption
-        scroll
-        class="mt-10"
-      />
+      {
+        entry.id === "push-pipeline" && (
+          <div data-scene="push-after">
+            <PinnedSteps steps={data.design.split(/(?<=\.) /)}>
+              <PushPipelineScene part="after" caption={pushCaptions.after} />
+            </PinnedSteps>
+          </div>
+        )
+      }
+      {
+        entry.id === "attendance-backend" && (
+          <>
+            <p class:list={["mt-4 text-muted", prose]}>{data.design}</p>
+            <div data-scene="attendance">
+              <PinnedSteps steps={attendanceSteps}>
+                <AttendanceScene caption={attendanceCaption} />
+              </PinnedSteps>
+            </div>
+          </>
+        )
+      }
+      {
+        entry.id === "for-you" && (
+          <>
+            <p class:list={["mt-4 text-muted", prose]}>{data.design}</p>
+            <FlowDiagram id="for-you-after" spec={forYouAfter} caption={forYouCaption} showCaption scroll class="mt-10" />
+            <ForYouScene />
+          </>
+        )
+      }
+      {entry.id === "cf-erp" && <CfErpScene steps={data.design.split("; ")} />}
     </section>
 
     {

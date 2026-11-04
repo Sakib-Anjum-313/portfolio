@@ -15,7 +15,7 @@ export interface FlowEdge {
   from: string;
   to: string;
   tone?: "flow" | "fail";
-  route?: "top";
+  route?: "top" | "down";
 }
 
 export interface FlowNote {
@@ -34,74 +34,6 @@ export interface FlowSpec {
   edges: FlowEdge[];
   notes?: FlowNote[];
 }
-
-// Push pipeline: before / after
-export const pushBefore: FlowSpec = {
-  width: 560,
-  height: 140,
-  nodes: [
-    { id: "req", label: "Requests", x: 0, y: 40, w: 100 },
-    { id: "api", label: "API", sub: "loops over users", x: 190, y: 40, w: 140, tone: "fail" },
-    { id: "fcm", label: "Firebase", x: 440, y: 40, w: 120 },
-  ],
-  edges: [
-    { from: "req", to: "api" },
-    { from: "api", to: "fcm", tone: "fail" },
-  ],
-  notes: [
-    { x: 260, y: 112, text: "Blocks, can crash", tone: "fail", anchor: "middle" },
-    { x: 484, y: 112, text: "429 Too Many Requests", tone: "fail", anchor: "middle" },
-  ],
-};
-
-export const pushAfter: FlowSpec = {
-  width: 672,
-  height: 150,
-  nodes: [
-    { id: "req", label: "Requests", x: 0, y: 40, w: 84 },
-    { id: "api", label: "API", x: 132, y: 40, w: 84 },
-    { id: "queue", label: "Queue", sub: "Redis", x: 264, y: 40, w: 108, tone: "system" },
-    { id: "workers", label: "Workers", sub: "Celery", x: 420, y: 40, w: 108, tone: "system" },
-    { id: "fcm", label: "Firebase", x: 576, y: 40, w: 96 },
-  ],
-  edges: [
-    { from: "req", to: "api" },
-    { from: "api", to: "queue" },
-    { from: "queue", to: "workers" },
-    { from: "workers", to: "fcm" },
-  ],
-  notes: [
-    { x: 174, y: 112, text: "202 Scheduled", tone: "ok", anchor: "middle" },
-    { x: 318, y: 112, text: "Absorbs spikes", tone: "muted", anchor: "middle" },
-    { x: 474, y: 112, text: "Scale with load", tone: "muted", anchor: "middle" },
-    { x: 474, y: 132, text: "Backed by PostgreSQL", tone: "muted", anchor: "middle" },
-  ],
-};
-
-// Attendance backend
-export const attendanceAfter: FlowSpec = {
-  width: 600,
-  height: 200,
-  nodes: [
-    { id: "terminal", label: "Terminal", sub: "SenseFace 2A", x: 0, y: 36, w: 140 },
-    { id: "push", label: "PUSH receiver", x: 230, y: 36, w: 140 },
-    { id: "raw", label: "Raw event", sub: "+ work item", x: 460, y: 36, w: 140, tone: "system" },
-    { id: "worker", label: "Locked worker", sub: "advisory lock", x: 460, y: 116, w: 140, tone: "system" },
-    { id: "daily", label: "Daily result", x: 230, y: 116, w: 140 },
-    { id: "reports", label: "7 reports", x: 0, y: 116, w: 140 },
-  ],
-  edges: [
-    { from: "terminal", to: "push" },
-    { from: "push", to: "raw" },
-    { from: "raw", to: "worker" },
-    { from: "worker", to: "daily" },
-    { from: "daily", to: "reports" },
-  ],
-  notes: [
-    { x: 415, y: 26, text: "one transaction", tone: "accent", anchor: "middle" },
-    { x: 0, y: 190, text: "Bounded retry · crash recovery · heartbeat", tone: "muted" },
-  ],
-};
 
 // For You
 export const forYouAfter: FlowSpec = {
@@ -139,15 +71,15 @@ export const cfErpAfter: FlowSpec = {
     { id: "accounts", label: "Accounts", x: 360, y: 0, w: 100, h: 40 },
     { id: "hr", label: "HR", x: 480, y: 0, w: 100, h: 40 },
     { id: "posted", label: "Posted entries", x: 100, y: 96, w: 140, tone: "system" },
-    { id: "ledger", label: "Ledger", x: 0, y: 176, w: 100, h: 40 },
-    { id: "journal", label: "Journal", x: 120, y: 176, w: 100, h: 40 },
-    { id: "contra", label: "Contra", x: 240, y: 176, w: 100, h: 40 },
+    { id: "ledger", label: "Ledger", x: 0, y: 176, w: 100, h: 40, tone: "system" },
+    { id: "journal", label: "Journal", x: 120, y: 176, w: 100, h: 40, tone: "system" },
+    { id: "contra", label: "Contra", x: 240, y: 176, w: 100, h: 40, tone: "system" },
   ],
   edges: [
     { from: "vouchers", to: "posted" },
-    { from: "posted", to: "ledger" },
+    { from: "posted", to: "ledger", route: "down" },
     { from: "posted", to: "journal" },
-    { from: "posted", to: "contra" },
+    { from: "posted", to: "contra", route: "down" },
   ],
   notes: [
     { x: 380, y: 124, text: "One source,", tone: "text" },
@@ -196,6 +128,20 @@ export const miniForYou: FlowSpec = {
   edges: [
     { from: "signals", to: "score" },
     { from: "score", to: "feed" },
+  ],
+};
+
+export const miniCfErp: FlowSpec = {
+  width: 264,
+  height: 80,
+  nodes: [
+    { id: "voucher", label: "Voucher", x: 0, y: 18, w: 72 },
+    { id: "posted", label: "Posted", x: 96, y: 18, w: 72, tone: "system" },
+    { id: "reports", label: "Reports", x: 192, y: 18, w: 72 },
+  ],
+  edges: [
+    { from: "voucher", to: "posted" },
+    { from: "posted", to: "reports" },
   ],
 };
 

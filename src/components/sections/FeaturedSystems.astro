@@ -21,12 +21,12 @@ const entries = await Promise.all(
 );
 ---
 
-<section class="mx-auto w-full max-w-6xl px-6 py-24 md:px-10 md:py-32">
+<section data-scene="systems" class="mx-auto w-full max-w-6xl px-6 py-24 md:px-10 md:py-32">
   <SectionLabel index="01" name="SYSTEMS" />
   <ul class="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
     {
       entries.map(({ entry, spec, caption }) => (
-        <li>
+        <li data-part="system-card">
           <Card href={`/work/${entry.id}`} class="flex h-full flex-col gap-6">
             <h3 class="text-xl font-semibold tracking-[-0.02em] group-hover:text-accent group-focus-visible:text-accent">
               {entry.data.title}
@@ -43,3 +43,65 @@ const entries = await Promise.all(
     }
   </ul>
 </section>
+
+<script>
+  import { gsap, MQ } from "../../lib/gsap";
+  import { onScene } from "../../lib/scene";
+
+  onScene("systems", (root) => {
+    const mm = gsap.matchMedia();
+
+    mm.add({ motion: MQ.motion, desktop: MQ.desktop }, (ctx) => {
+      const { motion, desktop } = ctx.conditions as Record<string, boolean>;
+      if (!motion) return;
+
+      const undo = gsap.utils.toArray<HTMLElement>("[data-part=system-card]", root).map((card, i) => {
+        const q = gsap.utils.selector(card);
+        const edges = gsap.utils.toArray<SVGPathElement>("[data-part=edge]", card);
+        const link = q("a")[0];
+
+        gsap
+          .timeline({
+            delay: desktop ? i * 0.1 : 0,
+            scrollTrigger: { trigger: card, start: "top 85%", once: true },
+          })
+          .from(card, { opacity: 0, y: 16 })
+          .from(q("[data-part=node]"), { opacity: 0, stagger: 0.12, duration: 0.3 }, 0.2)
+          .from(edges, { drawSVG: "0%", opacity: 0, stagger: 0.12, duration: 0.4 }, 0.3);
+
+        // A data dot runs the diagram's path once per hover or focus, behind the nodes.
+        const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        dot.setAttribute("r", "3");
+        dot.setAttribute("class", "fill-accent opacity-0");
+        q("[data-part=node]")[0].before(dot);
+
+        const run = gsap.timeline({ paused: true });
+        run.set(dot, { opacity: 1 });
+        edges.forEach((edge) => {
+          run.to(dot, {
+            motionPath: { path: edge, align: edge, alignOrigin: [0.5, 0.5] },
+            duration: 0.45,
+            ease: "none",
+          });
+        });
+        run.set(dot, { opacity: 0 });
+
+        const play = () => {
+          if (!run.isActive()) run.restart();
+        };
+        link.addEventListener("mouseenter", play);
+        link.addEventListener("focusin", play);
+
+        return () => {
+          link.removeEventListener("mouseenter", play);
+          link.removeEventListener("focusin", play);
+          dot.remove();
+        };
+      });
+
+      return () => undo.forEach((fn) => fn());
+    });
+
+    return () => mm.revert();
+  });
+</script>

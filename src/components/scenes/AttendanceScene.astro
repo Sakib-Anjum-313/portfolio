@@ -1,0 +1,260 @@
+---
+interface Props {
+  caption: string;
+}
+
+const { caption } = Astro.props;
+
+const box = "fill-ink-900 stroke-line";
+const system = "fill-ink-900 stroke-accent";
+const label = "fill-text font-mono";
+const note = "fill-muted font-mono";
+
+// Placeholder month: invented statuses, never real attendance data.
+const LATE_DAY = 11;
+const OVERRIDE_DAY = 19;
+const statusFor = (i: number) => (i % 7 === 6 ? "W" : i === 15 ? "H" : i === 3 || i === 24 || i === LATE_DAY ? "L" : "P");
+const tone = {
+  P: { fill: "fill-ok/20", text: "fill-ok" },
+  L: { fill: "fill-wait/20", text: "fill-wait" },
+  H: { fill: "fill-ink-800", text: "fill-text" },
+  W: { fill: "fill-ink-900", text: "fill-muted" },
+};
+const cells = Array.from({ length: 30 }, (_, i) => ({
+  i,
+  x: 160 + (i % 7) * 48,
+  y: 150 + Math.floor(i / 7) * 40,
+  status: statusFor(i) as keyof typeof tone,
+}));
+const legend = [
+  { key: "P" as const, text: "Present" },
+  { key: "L" as const, text: "Late" },
+  { key: "H" as const, text: "Holiday" },
+  { key: "W" as const, text: "Weekly off" },
+];
+---
+
+<figure class="m-0">
+  <div data-part="scroller" class="overflow-x-auto">
+    <svg viewBox="0 0 640 400" class="block h-auto w-full" style="min-width:640px" aria-hidden="true">
+      <defs>
+        <marker id="at-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto">
+          <path d="M0 0 L8 4 L0 8 z" class="fill-accent"></path>
+        </marker>
+      </defs>
+
+      <path d="M110 58 H150" fill="none" stroke-width="1.25" class="stroke-accent" marker-end="url(#at-arrow)"></path>
+      <path d="M260 58 H300" fill="none" stroke-width="1.25" class="stroke-accent" marker-end="url(#at-arrow)"></path>
+      <path d="M430 58 H490" fill="none" stroke-width="1.25" class="stroke-accent" marker-end="url(#at-arrow)"></path>
+      <path data-part="to-calendar" d="M565 86 V118 H328 V146" fill="none" stroke-width="1.25" class="stroke-accent" marker-end="url(#at-arrow)"></path>
+      <path data-part="to-reports" d="M160 250 H110" fill="none" stroke-width="1.25" class="stroke-accent" marker-end="url(#at-arrow)"></path>
+
+      <g>
+        <rect x="0" y="30" width="110" height="56" rx="8" stroke-width="1.25" class={box}></rect>
+        <text x="55" y="55" text-anchor="middle" font-size="12" class={label}>Terminal</text>
+        <text x="55" y="71" text-anchor="middle" font-size="12" class={note}>SenseFace 2A</text>
+      </g>
+      <g>
+        <rect x="150" y="30" width="110" height="56" rx="8" stroke-width="1.25" class={box}></rect>
+        <text x="205" y="62" text-anchor="middle" font-size="12" class={label}>PUSH receiver</text>
+      </g>
+
+      <text data-part="transaction" x="365" y="12" text-anchor="middle" font-size="12" class="fill-accent font-mono">one transaction</text>
+      <g>
+        <rect x="300" y="20" width="130" height="76" rx="8" stroke-width="1.25" class={system}></rect>
+        <text x="365" y="42" text-anchor="middle" font-size="12" class={label}>Raw evidence</text>
+        <text x="365" y="58" text-anchor="middle" font-size="12" class={note}>immutable</text>
+        <g transform="translate(419 30)" class="stroke-accent" fill="none" stroke-width="1.25">
+          <path d="M-3 0 V-3 a3 3 0 0 1 6 0 V0"></path>
+          <rect x="-5" y="0" width="10" height="8" rx="1.5"></rect>
+        </g>
+        {[331, 357, 383].map((x) => <rect data-part="evidence" x={x} y="72" width="16" height="10" rx="2" class="fill-accent" />)}
+      </g>
+      <text data-part="ignored" x="320" y="112" text-anchor="end" font-size="12" class="fill-wait font-mono">duplicate ignored</text>
+
+      <g data-part="worker">
+        <rect x="490" y="30" width="150" height="56" rx="8" stroke-width="1.25" class={system}></rect>
+        <text x="565" y="55" text-anchor="middle" font-size="12" class={label}>Locked worker</text>
+        <text x="565" y="71" text-anchor="middle" font-size="12" class={note}>advisory lock</text>
+      </g>
+
+      <text data-part="month-label" x="160" y="366" font-size="12" class={note}>Daily results, placeholder month</text>
+      {
+        cells.map((c) => (
+          <g data-part="cell">
+            <rect x={c.x} y={c.y} width="44" height="36" rx="4" stroke-width="1.25" class:list={["stroke-line", tone[c.status].fill]} />
+            <text x={c.x + 22} y={c.y + 22} text-anchor="middle" font-size="12" class:list={["font-mono", tone[c.status].text]}>{c.status}</text>
+            {c.i === LATE_DAY && (
+              <g data-part="recalculated" class="opacity-0">
+                <rect x={c.x} y={c.y} width="44" height="36" rx="4" stroke-width="1.25" class="fill-ink-950 stroke-ok" />
+                <rect x={c.x} y={c.y} width="44" height="36" rx="4" class="fill-ok/20" />
+                <text x={c.x + 22} y={c.y + 22} text-anchor="middle" font-size="12" class="fill-ok font-mono">P</text>
+              </g>
+            )}
+            {c.i === OVERRIDE_DAY && (
+              <>
+                <circle cx={c.x + 37} cy={c.y + 7} r="3" class="fill-accent" />
+                <rect data-part="flag-outline" x={c.x} y={c.y} width="44" height="36" rx="4" fill="none" stroke-width="2" class="stroke-wait opacity-0" />
+              </>
+            )}
+          </g>
+        ))
+      }
+
+      <g data-part="reports">
+        <rect x="0" y="228" width="110" height="44" rx="8" stroke-width="1.25" class={box}></rect>
+        <text x="55" y="254" text-anchor="middle" font-size="12" class={label}>7 reports</text>
+      </g>
+
+      <g data-part="legend">
+        {
+          legend.map((l, i) => (
+            <g>
+              <rect x="516" y={162 + i * 22} width="12" height="12" rx="2" stroke-width="1.25" class:list={["stroke-line", tone[l.key].fill]} />
+              <text x="536" y={173 + i * 22} font-size="12" class={note}>{l.text}</text>
+            </g>
+          ))
+        }
+        <circle cx="522" cy="256" r="3" class="fill-accent"></circle>
+        <text x="536" y="261" font-size="12" class={note}>HR override</text>
+      </g>
+      <g data-part="flag-legend" class="opacity-0">
+        <rect x="516" y="272" width="12" height="12" rx="2" fill="none" stroke-width="2" class="stroke-wait"></rect>
+        <text x="536" y="283" font-size="12" class="fill-wait font-mono">Review required</text>
+      </g>
+
+      <text data-part="safety" x="0" y="384" font-size="12" class={note}>Bounded retry · crash recovery · heartbeat</text>
+
+      {[0, 1, 2].map(() => <circle data-part="punch" cx="110" cy="58" r="4" class="fill-accent opacity-0" />)}
+      <circle data-part="duplicate" cx="110" cy="58" r="4" class="fill-wait opacity-0"></circle>
+      <circle data-part="late-dot" r="4" class="fill-accent opacity-0"></circle>
+    </svg>
+  </div>
+  <div data-part="controls" hidden class="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2">
+    <button
+      type="button"
+      data-part="late"
+      class="rounded-full border border-line px-4 py-1.5 text-sm text-text transition-colors hover:border-accent/40 focus-visible:border-accent/40"
+    >
+      Send a late punch
+    </button>
+    <p data-part="status" aria-live="polite" class="font-mono text-xs text-text"></p>
+  </div>
+  <figcaption class="mt-3 text-sm text-muted">{caption}</figcaption>
+</figure>
+
+<script>
+  import { gsap, MQ } from "../../lib/gsap";
+  import { onScene } from "../../lib/scene";
+  import { playSteps } from "../../lib/steps";
+
+  const LABEL = "Send a late punch";
+  const RESET = "Reset";
+  const STATUS = 'Day 12 recalculated from Late to Present. Day 20 keeps HR\'s value and is flagged "Review required".';
+  const ROUTE = [
+    { x: 565, y: 58 },
+    { x: 565, y: 118 },
+    { x: 328, y: 118 },
+  ];
+  const DAY_12 = { x: 374, y: 208 };
+  const DAY_20 = { x: 422, y: 248 };
+
+  onScene("attendance", (root) => {
+    const q = gsap.utils.selector(root);
+    const controls = q("[data-part=controls]")[0];
+    const button = q("[data-part=late]")[0] as HTMLButtonElement;
+    const status = q("[data-part=status]")[0];
+    controls.hidden = false;
+
+    const mm = gsap.matchMedia();
+
+    mm.add({ motion: MQ.motion, reduce: MQ.reduce, desktop: MQ.desktop }, (ctx) => {
+      const { motion, desktop } = ctx.conditions as Record<string, boolean>;
+      let pressed = false;
+      let press: gsap.core.Timeline | undefined;
+
+      const after = q("[data-part=recalculated], [data-part=flag-outline], [data-part=flag-legend]");
+      const lateDot = q("[data-part=late-dot]");
+      const scroller = q("[data-part=scroller]")[0];
+
+      const settle = (on: boolean) => {
+        gsap.to(after, { opacity: on ? 1 : 0, duration: motion ? 0.3 : 0, overwrite: "auto" });
+        status.textContent = on ? STATUS : "";
+        button.textContent = on ? RESET : LABEL;
+      };
+      const onClick = () => {
+        pressed = !pressed;
+        // Narrow screens scroll this diagram sideways, so bring the changed days into view.
+        if (pressed) scroller.scrollTo({ left: DAY_20.x - scroller.clientWidth / 2, behavior: motion ? "smooth" : "auto" });
+        press?.kill();
+        gsap.set(lateDot, { opacity: 0 });
+        if (!pressed || !motion) {
+          settle(pressed);
+          return;
+        }
+        // The punch takes the same route as every other event, then lands on both days.
+        gsap.set(lateDot, { x: 110, y: 58, opacity: 1 });
+        press = gsap
+          .timeline({ onComplete: () => settle(true) })
+          .to(lateDot, { motionPath: { path: [...ROUTE, DAY_12], curviness: 0 }, duration: 1, ease: "power1.inOut" })
+          .to(lateDot, { motionPath: { path: [DAY_20], curviness: 0 }, duration: 0.25, ease: "none" })
+          .to(lateDot, { opacity: 0, duration: 0.15 });
+      };
+      button.addEventListener("click", onClick);
+
+      let stopSteps = () => {};
+      if (motion) {
+        const tl = gsap.timeline({ paused: true, defaults: { duration: 0.3 } });
+        const punches = q("[data-part=punch]");
+        const evidence = q("[data-part=evidence]");
+        const duplicate = q("[data-part=duplicate]");
+
+        tl.addLabel("step0", 0);
+        tl.from(q("[data-part=transaction]"), { opacity: 0 }, 0);
+        punches.forEach((punch, i) => {
+          const at = i * 0.28;
+          tl.set(punch, { opacity: 1 }, at);
+          tl.to(punch, { x: 200, duration: 0.5, ease: "power1.inOut" }, at);
+          tl.set(punch, { opacity: 0 }, at + 0.5);
+          tl.from(evidence[i], { opacity: 0, duration: 0.15 }, at + 0.45);
+        });
+        tl.addLabel("step1", 1.2);
+
+        tl.set(duplicate, { opacity: 1 }, 1.25);
+        tl.to(duplicate, { x: 186, duration: 0.4, ease: "power1.in" }, 1.25);
+        tl.to(duplicate, { x: 120, duration: 0.35, ease: "power2.out" }, 1.65);
+        tl.to(duplicate, { opacity: 0, duration: 0.2 }, 1.85);
+        tl.from(q("[data-part=ignored]"), { opacity: 0, y: 4 }, 1.65);
+        tl.addLabel("step2", 2.1);
+
+        tl.from(q("[data-part=worker]"), { opacity: 0.3 }, 2.15);
+        tl.from(q("[data-part=to-calendar]"), { drawSVG: "0%", opacity: 0, duration: 0.35 }, 2.3);
+        tl.from(q("[data-part=month-label]"), { opacity: 0 }, 2.5);
+        tl.from(q("[data-part=cell]"), { opacity: 0, duration: 0.2, stagger: 0.025 }, 2.6);
+        tl.from(q("[data-part=legend]"), { opacity: 0 }, 3.1);
+        tl.from(q("[data-part=to-reports]"), { drawSVG: "0%", opacity: 0 }, 3.4);
+        tl.from(q("[data-part=reports]"), { opacity: 0 }, 3.5);
+        tl.addLabel("step3", 3.9);
+
+        tl.from(q("[data-part=safety]"), { opacity: 0 }, 3.95);
+        tl.addLabel("step4", 4.3);
+
+        stopSteps = playSteps(root, tl, desktop);
+      }
+
+      return () => {
+        button.removeEventListener("click", onClick);
+        press?.kill();
+        gsap.set(after, { opacity: 0 });
+        status.textContent = "";
+        button.textContent = LABEL;
+        stopSteps();
+      };
+    });
+
+    return () => {
+      mm.revert();
+      controls.hidden = true;
+    };
+  });
+</script>

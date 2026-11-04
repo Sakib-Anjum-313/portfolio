@@ -50,6 +50,28 @@
   }
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  /* Holds on-screen scene content for the first paint, so it never flashes before its entrance.
+     The failsafe shows it anyway if the script is slow or fails. */
+  .js [data-prehide]:not([data-ready]) {
+    visibility: hidden;
+    animation: prehide-failsafe 0s 1.2s forwards;
+  }
+
+  /* Scroll distance for steps beside a sticky diagram. Only when the scroll actually drives something. */
+  @media (min-width: 1024px) {
+    .js [data-step][data-tall] {
+      min-height: 40vh;
+    }
+  }
+}
+
+@keyframes prehide-failsafe {
+  to {
+    visibility: visible;
+  }
+}
+
 @layer components {
   /* Blueprint cursor (lib/cursor.ts): a brighter copy of the grid, masked to 180px around the pointer. */
   .blueprint-cursor {

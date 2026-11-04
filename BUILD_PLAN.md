@@ -48,7 +48,7 @@ The whole site sits on a faint blueprint grid. Real-world inputs (orders, punche
 
 ### Experience `/experience` (inspired by brittanychiang.com, credited in footer)
 
-**Desktop:** left column (40%) is sticky: name, role, one-line positioning, photo (transparent cutout over the grid, accent arc behind), in-page nav (Experience · Skills · Education), social icons, resume button. Right column scrolls.
+**Desktop:** left column (40%) is sticky: name, role, one-line positioning, avatar (shown whole, with the ring built into the image), in-page nav (Experience · Skills · Education), social icons, resume button. Right column scrolls.
 
 **Right column:**
 1. **About:** short paragraph from the brief.

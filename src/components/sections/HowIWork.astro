@@ -3,23 +3,70 @@ import { howIWork } from "../../data/site";
 import SectionLabel from "../ui/SectionLabel.astro";
 ---
 
-<section class="mx-auto w-full max-w-6xl px-6 py-24 md:px-10 md:py-32">
+<section data-scene="how-i-work" class="mx-auto w-full max-w-6xl px-6 py-24 md:px-10 md:py-32">
   <SectionLabel index="02" name="HOW I WORK" />
   <ol
-    class="relative mt-14 grid gap-10 border-l border-accent pl-8 lg:grid-cols-4 lg:gap-8 lg:border-l-0 lg:border-t lg:pl-0 lg:pt-8"
+    data-part="track"
+    class="relative mt-14 grid gap-10 border-l border-line pl-8 lg:grid-cols-4 lg:gap-8 lg:border-l-0 lg:border-t lg:pl-0 lg:pt-8"
   >
+    <span
+      data-part="line"
+      aria-hidden="true"
+      class="absolute -left-px inset-y-0 w-px origin-top bg-accent lg:-top-px lg:bottom-auto lg:left-0 lg:right-0 lg:h-px lg:w-auto lg:origin-left"
+    ></span>
     {
       howIWork.map((step, i) => (
-        <li class="relative">
+        <li data-part="step" class="relative">
           <span
             aria-hidden="true"
-            class="absolute -left-[39px] top-1.5 size-3.5 rounded-full bg-accent ring-4 ring-ink-950 lg:-top-[39px] lg:left-0"
-          />
-          <p class="font-mono text-xs tabular-nums text-accent">{String(i + 1).padStart(2, "0")}</p>
-          <h3 class="mt-2 text-lg font-semibold tracking-[-0.02em]">{step.title}</h3>
-          <p class="mt-2 text-muted">{step.body}</p>
+            class="absolute -left-[39px] top-1.5 size-3.5 rounded-full bg-ink-950 ring-1 ring-accent lg:-top-[39px] lg:left-0"
+          >
+            <span data-part="fill" class="block size-full rounded-full bg-accent" />
+          </span>
+          <div data-part="copy">
+            <p class="font-mono text-xs tabular-nums text-accent">{String(i + 1).padStart(2, "0")}</p>
+            <h3 class="mt-2 text-lg font-semibold tracking-[-0.02em]">{step.title}</h3>
+            <p class="mt-2 text-muted">{step.body}</p>
+          </div>
         </li>
       ))
     }
   </ol>
 </section>
+
+<script>
+  import { gsap, MQ } from "../../lib/gsap";
+  import { onScene } from "../../lib/scene";
+
+  onScene("how-i-work", (root) => {
+    const q = gsap.utils.selector(root);
+    const mm = gsap.matchMedia();
+
+    mm.add(`${MQ.motion} and ${MQ.desktop}`, () => {
+      const steps = q("[data-part=step]");
+      const tl = gsap.timeline({
+        defaults: { ease: "none" },
+        scrollTrigger: { trigger: q("[data-part=track]")[0], start: "top 75%", end: "bottom 45%", scrub: 0.6 },
+      });
+      tl.from(q("[data-part=line]"), { scaleX: 0, duration: 1 }, 0);
+      steps.forEach((step, i) => {
+        const at = i * 0.24;
+        tl.from(step.querySelector("[data-part=fill]"), { scale: 0, duration: 0.05 }, at);
+        // Waiting steps stay readable: 0.75 keeps the muted text at WCAG AA.
+        tl.from(step.querySelector("[data-part=copy]"), { opacity: 0.75, duration: 0.08 }, at);
+      });
+    });
+
+    // Mobile: the steps reveal one by one, with no scroll link.
+    mm.add(`${MQ.motion} and ${MQ.mobile}`, () => {
+      q("[data-part=step]").forEach((step) => {
+        gsap
+          .timeline({ scrollTrigger: { trigger: step, start: "top 85%", once: true } })
+          .from(step.querySelector("[data-part=fill]"), { scale: 0, duration: 0.3 }, 0)
+          .from(step.querySelector("[data-part=copy]"), { opacity: 0, y: 12 }, 0);
+      });
+    });
+
+    return () => mm.revert();
+  });
+</script>

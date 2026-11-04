@@ -2,13 +2,12 @@
 import { aiWorkflow, principles } from "../../data/ai-workflow";
 import SectionLabel from "../ui/SectionLabel.astro";
 import ArrowLink from "../ui/ArrowLink.astro";
-import FlowDiagram from "../diagrams/FlowDiagram.astro";
-import { agentLoop } from "../diagrams/specs";
+import AgentLoopScene from "../scenes/AgentLoopScene.astro";
 ---
 
 <section class="mx-auto w-full max-w-6xl px-6 py-24 md:px-10 md:py-32">
   <SectionLabel as="p" index="04" name="AI WORKFLOW" />
-  <div class="mt-10 grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
+  <div class="mt-10 grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-10">
     <div>
       <h2 data-reveal class="text-3xl font-semibold tracking-[-0.02em] md:text-[2.5rem] md:leading-tight">
         {aiWorkflow.headline}
@@ -31,11 +30,6 @@ import { agentLoop } from "../diagrams/specs";
         <ArrowLink href="/ai-workflow">How I build with AI</ArrowLink>
       </p>
     </div>
-    <FlowDiagram
-      id="agent-loop"
-      spec={agentLoop}
-      scroll
-      caption="Each change moves from context to plan, build and verify. A rejected assumption loops back to plan, and only a verified change reaches merge."
-    />
+    <AgentLoopScene />
   </div>
 </section>

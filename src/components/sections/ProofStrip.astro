@@ -1,10 +1,10 @@
 ---
 import { proof } from "../../data/site";
 import MetricCounter from "../ui/MetricCounter.astro";
-import LatencyBar from "../diagrams/LatencyBar.astro";
+import LatencyBar from "../scenes/LatencyBar.astro";
 ---
 
-<section aria-label="Proof" class="border-y border-line bg-ink-900/70">
+<section data-scene="proof" aria-label="Proof" class="border-y border-line bg-ink-900/70">
   <div class="mx-auto w-full max-w-6xl px-6 py-12 md:px-10">
     <ul class="grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-5">
       {
@@ -19,3 +19,41 @@ import LatencyBar from "../diagrams/LatencyBar.astro";
     </ul>
   </div>
 </section>
+
+<script>
+  import { gsap, MQ } from "../../lib/gsap";
+  import { onScene } from "../../lib/scene";
+
+  onScene("proof", (root) => {
+    const counters = gsap.utils.toArray<HTMLElement>("[data-count]", root);
+    const finals = counters.map((el) => el.textContent ?? "");
+    const mm = gsap.matchMedia();
+
+    mm.add(MQ.motion, () => {
+      const tl = gsap.timeline({ scrollTrigger: { trigger: root, start: "top 90%", once: true } });
+
+      counters.forEach((el, i) => {
+        // "5M+" counts the 5 and keeps the "M+".
+        const [, digits, suffix] = finals[i].match(/^(\d+)(.*)$/) ?? [];
+        const count = { value: 0 };
+        el.textContent = `0${suffix}`;
+        tl.to(
+          count,
+          {
+            value: Number(digits),
+            duration: 1.2,
+            ease: "power2.out",
+            onUpdate: () => {
+              el.textContent = `${Math.round(count.value)}${suffix}`;
+            },
+          },
+          i * 0.08
+        );
+      });
+
+      return () => counters.forEach((el, i) => (el.textContent = finals[i]));
+    });
+
+    return () => mm.revert();
+  });
+</script>

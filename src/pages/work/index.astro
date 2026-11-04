@@ -3,13 +3,22 @@ import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import MetricBadge from "../../components/ui/MetricBadge.astro";
 import Pill from "../../components/ui/Pill.astro";
+import FlowDiagram from "../../components/diagrams/FlowDiagram.astro";
+import { miniPush, miniAttendance, miniForYou, miniCfErp } from "../../components/diagrams/specs";
+import type { FlowSpec } from "../../components/diagrams/specs";
 
 const work = (await getCollection("work")).sort((a, b) => a.data.order - b.data.order);
 const filters = ["All", "Backend", "Full stack", "Integrations"];
+const previews: Record<string, FlowSpec> = {
+  "push-pipeline": miniPush,
+  "attendance-backend": miniAttendance,
+  "for-you": miniForYou,
+  "cf-erp": miniCfErp,
+};
 ---
 
 <BaseLayout title="Work">
-  <section class="mx-auto w-full max-w-6xl px-6 py-24 md:px-10 md:py-32">
+  <section data-scene="work-index" class="mx-auto w-full max-w-6xl px-6 py-24 md:px-10 md:py-32">
     <h1 class="text-4xl font-semibold tracking-[-0.02em] md:text-5xl">Work</h1>
     <p class="mt-4 max-w-[65ch] text-lg text-muted">
       Systems I designed and built, and the problems they solved.
@@ -30,61 +39,179 @@ const filters = ["All", "Backend", "Full stack", "Integrations"];
       }
     </div>
 
-    <ol class="mt-12 border-t border-line">
-      {
-        work.map((entry, i) => (
-          <li data-category={entry.data.category.join("|")} class="border-b border-line">
-            <a
-              href={`/work/${entry.id}`}
-              class="group grid gap-6 py-8 transition-colors hover:bg-ink-900/70 focus-visible:bg-ink-900/70 md:grid-cols-[3rem_1fr_16rem] md:px-4"
-            >
-              <p class="font-mono text-sm tabular-nums text-muted">{String(i + 1).padStart(2, "0")}</p>
-              <div>
-                <h2 class="text-2xl font-semibold tracking-[-0.02em] group-hover:text-accent group-focus-visible:text-accent">
-                  {entry.data.title}
-                </h2>
-                <p class="mt-2 max-w-[65ch] text-muted">{entry.data.tagline}</p>
-                <div class="mt-4">
-                  <MetricBadge>{entry.data.metric}</MetricBadge>
+    <div data-part="list" class="relative mt-12">
+      <ol class="border-t border-line">
+        {
+          work.map((entry, i) => (
+            <li data-category={entry.data.category.join("|")} data-slug={entry.id} class="border-b border-line">
+              <a
+                href={`/work/${entry.id}`}
+                class="group grid gap-6 py-8 transition-colors hover:bg-ink-900/70 focus-visible:bg-ink-900/70 md:grid-cols-[3rem_1fr_16rem] md:px-4"
+              >
+                <p class="font-mono text-sm tabular-nums text-muted">{String(i + 1).padStart(2, "0")}</p>
+                <div>
+                  <h2 class="text-2xl font-semibold tracking-[-0.02em] group-hover:text-accent group-focus-visible:text-accent">
+                    {entry.data.title}
+                  </h2>
+                  <p class="mt-2 max-w-[65ch] text-muted">{entry.data.tagline}</p>
+                  <div class="mt-4">
+                    <MetricBadge>{entry.data.metric}</MetricBadge>
+                  </div>
+                  <ul class="mt-4 flex flex-wrap gap-2" aria-label="Stack">
+                    {entry.data.stack.map((s) => (
+                      <li>
+                        <Pill>{s}</Pill>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <ul class="mt-4 flex flex-wrap gap-2" aria-label="Stack">
-                  {entry.data.stack.map((s) => (
-                    <li>
-                      <Pill>{s}</Pill>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <img
-                src={entry.data.cover}
-                alt={`Blueprint cover for ${entry.data.title}`}
-                width="800"
-                height="450"
-                loading="lazy"
-                class="h-auto w-full rounded-lg border border-line md:self-start"
-              />
-            </a>
-          </li>
-        ))
-      }
-    </ol>
+                <img
+                  src={entry.data.cover}
+                  alt={`Blueprint cover for ${entry.data.title}`}
+                  width="800"
+                  height="450"
+                  loading="lazy"
+                  class="h-auto w-full rounded-lg border border-line md:self-start"
+                />
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+      <div
+        data-part="preview"
+        hidden
+        aria-hidden="true"
+        class="pointer-events-none absolute right-4 top-0 z-10 w-72 rounded-lg border border-accent/40 bg-ink-900 p-3 opacity-0"
+      >
+        {
+          work.map((entry) => (
+            <div data-preview={entry.id} hidden>
+              <FlowDiagram id={`preview-${entry.id}`} spec={previews[entry.id]} caption={entry.data.title} />
+            </div>
+          ))
+        }
+      </div>
+    </div>
   </section>
 </BaseLayout>
 
 <script>
-  const bar = document.querySelector<HTMLElement>("[data-filters]");
-  const rows = document.querySelectorAll<HTMLElement>("[data-category]");
+  import { Flip, gsap, MQ } from "../../lib/gsap";
+  import { onScene } from "../../lib/scene";
 
-  if (bar) {
+  onScene("work-index", (root) => {
+    const q = gsap.utils.selector(root);
+    const bar = q("[data-filters]")[0];
+    const rows = q("[data-category]");
+    const buttons = q("[data-filter]");
     bar.hidden = false;
-    bar.addEventListener("click", (event) => {
-      const button = (event.target as HTMLElement).closest<HTMLButtonElement>("[data-filter]");
-      if (!button) return;
-      const value = button.dataset.filter!;
-      bar.querySelectorAll("[data-filter]").forEach((b) => b.setAttribute("aria-pressed", String(b === button)));
-      rows.forEach((row) => {
-        row.hidden = value !== "All" && !row.dataset.category!.split("|").includes(value);
-      });
+
+    const mm = gsap.matchMedia();
+
+    // Filter: works everywhere. Only the Flip depends on motion.
+    mm.add({ motion: MQ.motion, reduce: MQ.reduce }, (ctx) => {
+      const { motion } = ctx.conditions as Record<string, boolean>;
+      let flip: gsap.core.Timeline | undefined;
+
+      const onClick = (event: Event) => {
+        const button = (event.target as HTMLElement).closest<HTMLElement>("[data-filter]");
+        if (!button) return;
+        const value = button.dataset.filter!;
+        buttons.forEach((b) => b.setAttribute("aria-pressed", String(b === button)));
+
+        const state = motion ? Flip.getState(rows) : null;
+        rows.forEach((row) => {
+          row.hidden = value !== "All" && !row.dataset.category!.split("|").includes(value);
+        });
+        if (state) {
+          flip?.kill();
+          flip = Flip.from(state, {
+            duration: 0.5,
+            ease: "power2.inOut",
+            // Only leaving rows come out of flow. Taking them all out collapses the list and resets the scroll.
+            absoluteOnLeave: true,
+            onEnter: (els) => gsap.fromTo(els, { opacity: 0 }, { opacity: 1, duration: 0.3 }),
+            onLeave: (els) => gsap.to(els, { opacity: 0, duration: 0.2 }),
+          });
+        }
+      };
+      bar.addEventListener("click", onClick);
+
+      return () => {
+        bar.removeEventListener("click", onClick);
+        flip?.kill();
+        rows.forEach((row) => (row.hidden = false));
+        buttons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.filter === "All")));
+      };
     });
-  }
+
+    // Hover preview: desktop pointers only. Everywhere else the row's cover is already inline.
+    mm.add(`${MQ.motion} and ${MQ.desktop} and (hover: hover)`, () => {
+      const list = root.querySelector<HTMLElement>("[data-part=list]")!;
+      const panel = q("[data-part=preview]")[0];
+      const diagrams = q("[data-preview]");
+      panel.hidden = false;
+
+      const yTo = gsap.quickTo(panel, "y", { duration: 0.4, ease: "power3" });
+      let current = "";
+
+      const follow = (clientY: number) => {
+        const { top, height } = list.getBoundingClientRect();
+        const max = Math.max(0, height - panel.offsetHeight);
+        yTo(gsap.utils.clamp(0, max, clientY - top - panel.offsetHeight / 2));
+      };
+      const show = (slug: string) => {
+        if (slug !== current) {
+          current = slug;
+          diagrams.forEach((d) => (d.hidden = d.dataset.preview !== slug));
+          const active = diagrams.find((d) => d.dataset.preview === slug)!;
+          gsap.fromTo(
+            active.querySelectorAll("[data-part=edge]"),
+            { drawSVG: "0%", opacity: 0 },
+            { drawSVG: "100%", opacity: 1, duration: 0.45, stagger: 0.15, overwrite: true }
+          );
+        }
+        gsap.to(panel, { opacity: 1, duration: 0.2, overwrite: "auto" });
+      };
+      const hide = () => {
+        current = "";
+        gsap.to(panel, { opacity: 0, duration: 0.2, overwrite: "auto" });
+      };
+
+      const onMove = (event: MouseEvent) => {
+        const row = (event.target as HTMLElement).closest<HTMLElement>("[data-slug]");
+        if (!row) return;
+        follow(event.clientY);
+        show(row.dataset.slug!);
+      };
+      // Hover effects also answer keyboard focus.
+      const onFocus = (event: FocusEvent) => {
+        const row = (event.target as HTMLElement).closest<HTMLElement>("[data-slug]");
+        if (!row) return;
+        const { top, height } = row.getBoundingClientRect();
+        follow(top + height / 2);
+        show(row.dataset.slug!);
+      };
+
+      list.addEventListener("mousemove", onMove);
+      list.addEventListener("mouseleave", hide);
+      list.addEventListener("focusin", onFocus);
+      list.addEventListener("focusout", hide);
+
+      return () => {
+        list.removeEventListener("mousemove", onMove);
+        list.removeEventListener("mouseleave", hide);
+        list.removeEventListener("focusin", onFocus);
+        list.removeEventListener("focusout", hide);
+        panel.hidden = true;
+        diagrams.forEach((d) => (d.hidden = true));
+      };
+    });
+
+    return () => {
+      mm.revert();
+      bar.hidden = true;
+    };
+  });
 </script>

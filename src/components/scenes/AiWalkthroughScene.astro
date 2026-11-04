@@ -1,0 +1,202 @@
+---
+import SectionLabel from "../ui/SectionLabel.astro";
+import Card from "../ui/Card.astro";
+import FlowDiagram from "../diagrams/FlowDiagram.astro";
+import { aiLanes } from "../diagrams/specs";
+import { walkthrough, theCatch, checklist } from "../../data/ai-workflow";
+
+interface Props {
+  sectionClass: string;
+}
+
+const { sectionClass } = Astro.props;
+---
+
+<section class={sectionClass} data-scene="ai-walkthrough">
+  <SectionLabel name="How I ship a feature with AI" />
+  <p class="mt-4 max-w-[65ch] text-muted">Example: the SenseFace 2A attendance integration.</p>
+  <div class="mt-10 grid gap-12 lg:grid-cols-[minmax(0,22rem)_1fr]">
+    <div class="hidden lg:block">
+      <div class="sticky top-8">
+        <FlowDiagram
+          id="ai-lanes"
+          spec={aiLanes}
+          caption="Two lanes, AI and me. In each of the first six steps the AI hands its work to me to check. The seventh step, merge, is mine alone."
+        />
+      </div>
+    </div>
+    <ol class="space-y-4">
+      {
+        walkthrough.map((s, i) => (
+          <li data-step>
+            <Card>
+              <div class="flex items-center justify-between gap-4">
+                <h3 class="text-lg font-semibold tracking-[-0.02em]">{s.step}</h3>
+                <svg viewBox="0 0 88 24" class="h-6 w-[88px] shrink-0 lg:hidden" aria-hidden="true">
+                  <g class:list={[i === 6 && "opacity-30"]}>
+                    <rect x="1" y="1" width="30" height="22" rx="6" stroke-width="1.25" class="fill-ink-800 stroke-line" />
+                    <text x="16" y="16" text-anchor="middle" font-size="12" class="fill-text font-mono">AI</text>
+                    {i !== 6 && <path d="M31 12 H55" fill="none" stroke-width="1.25" class="stroke-accent" />}
+                  </g>
+                  <rect x="57" y="1" width="30" height="22" rx="6" stroke-width="1.25" class:list={["fill-ink-800", i === 6 ? "stroke-ok" : "stroke-accent"]} />
+                  <text x="72" y="16" text-anchor="middle" font-size="12" class="fill-text font-mono">Me</text>
+                </svg>
+              </div>
+              <dl class="mt-4 grid gap-4 sm:grid-cols-2">
+                <div>
+                  <dt class="font-mono text-xs uppercase tracking-wide text-accent">What the AI does</dt>
+                  <dd class="mt-1 text-muted">{s.ai}</dd>
+                </div>
+                <div>
+                  <dt class="font-mono text-xs uppercase tracking-wide text-accent">What I do</dt>
+                  <dd class="mt-1 text-muted">{s.me}</dd>
+                </div>
+              </dl>
+            </Card>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<section class={sectionClass}>
+  <SectionLabel name="The catch" />
+  <div data-scene="the-catch" class="mt-10 max-w-3xl overflow-hidden rounded-lg border border-line bg-ink-900">
+    <p class="border-b border-line px-5 py-3 font-mono text-xs text-muted">
+      Reconstruction of the exchange, not a verbatim log.
+    </p>
+    <div class="space-y-5 p-5 font-mono text-sm leading-relaxed">
+      <p>
+        <span class="text-accent">AI</span>
+        <span data-part="claim" class="text-muted line-through decoration-fail decoration-2">{theCatch.claim}</span>
+      </p>
+      <p data-part="challenge">
+        <span class="text-accent">Me</span>
+        <span class="text-text">{theCatch.challenge}</span>
+      </p>
+      <p data-part="result" class="border-l-2 border-ok pl-4">
+        <span class="text-accent">AI</span>
+        <span class="text-text">{theCatch.result}</span>
+      </p>
+      <p data-part="lesson" class="font-sans text-base font-semibold text-text">{theCatch.lesson}</p>
+    </div>
+  </div>
+</section>
+
+<section class={sectionClass} data-scene="checklist">
+  <SectionLabel name="Verification checklist" />
+  <div class="mt-10 grid gap-10 lg:grid-cols-[1fr_auto] lg:items-start">
+    <ol class="max-w-3xl space-y-4">
+      {
+        checklist.map((item) => (
+          <li data-part="check-item" class="flex gap-4">
+            <svg aria-hidden="true" viewBox="0 0 20 20" class="mt-1 size-5 shrink-0" fill="none" stroke-width="1.5">
+              <rect x="1" y="1" width="18" height="18" rx="4" class="stroke-ok" />
+              <path data-part="tick" d="M5.5 10.5 L8.5 13.5 L14.5 7" class="stroke-ok" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <span class="text-muted">{item}</span>
+          </li>
+        ))
+      }
+    </ol>
+    <p class="font-mono text-2xl font-semibold tabular-nums text-text lg:sticky lg:top-8">
+      <span class="sr-only">{checklist.length}/{checklist.length}</span>
+      <span data-part="count" aria-hidden="true">{checklist.length}/{checklist.length}</span>
+      <span class="text-sm font-normal text-muted">before merge</span>
+    </p>
+  </div>
+</section>
+
+<script>
+  import { gsap, MQ, SplitText } from "../../lib/gsap";
+  import { onScene } from "../../lib/scene";
+  import { playSteps } from "../../lib/steps";
+
+  onScene("ai-walkthrough", (root) => {
+    const mm = gsap.matchMedia();
+
+    // Desktop only: mobile shows stacked cards with their own small icon, and no diagram to drive.
+    mm.add(`${MQ.motion} and ${MQ.desktop}`, () => {
+      const q = gsap.utils.selector(root);
+      const steps = gsap.utils.toArray<HTMLElement>("[data-step]", root);
+      const tl = gsap.timeline({ paused: true, defaults: { duration: 0.2 } });
+      tl.addLabel("step0", 0);
+
+      steps.forEach((_, i) => {
+        const n = i + 1;
+        const at = i * 0.5;
+        const ai = q(`[data-node="ai${n}"]`);
+        if (ai.length) {
+          tl.from(ai, { opacity: 0.25 }, at);
+          tl.from(q(`[data-from="ai${n}"]`), { drawSVG: "0%", opacity: 0, duration: 0.25 }, at + 0.1);
+        }
+        tl.from(q(`[data-node="me${n}"]`), { opacity: 0.25 }, at + 0.25);
+        tl.addLabel(`step${n}`, at + 0.5);
+      });
+
+      // Muted text on a card needs more than the default dim to stay at WCAG AA.
+      return playSteps(root, tl, true, 0.85);
+    });
+
+    return () => mm.revert();
+  });
+
+  onScene("the-catch", (root) => {
+    const q = gsap.utils.selector(root);
+    const claim = q("[data-part=claim]")[0];
+    const STRIKE = ["line-through", "decoration-fail", "decoration-2"];
+    const mm = gsap.matchMedia();
+
+    mm.add(MQ.motion, () => {
+      // Types the claim, then strikes it out once the challenge lands. Characters are restored
+      // before the strike because line-through can't run across split inline-block letters.
+      claim.classList.remove(...STRIKE);
+      const split = SplitText.create(claim, { type: "words,chars" });
+
+      gsap
+        .timeline({ scrollTrigger: { trigger: root, start: "top 70%", once: true } })
+        .from(split.chars, { opacity: 0, duration: 0.01, stagger: 0.008 }, 0)
+        .call(() => split.revert())
+        .from(q("[data-part=challenge]"), { opacity: 0, y: 8, duration: 0.4 }, "+=0.2")
+        .call(() => claim.classList.add(...STRIKE), undefined, "+=0.5")
+        .from(q("[data-part=result]"), { opacity: 0, y: 8, duration: 0.4 }, "+=0.2")
+        .from(q("[data-part=lesson]"), { opacity: 0, duration: 0.4 }, "+=0.2");
+
+      return () => claim.classList.add(...STRIKE);
+    });
+
+    return () => mm.revert();
+  });
+
+  onScene("checklist", (root) => {
+    const q = gsap.utils.selector(root);
+    const count = q("[data-part=count]")[0];
+    const final = count.textContent;
+    const mm = gsap.matchMedia();
+
+    mm.add(MQ.motion, () => {
+      const items = q("[data-part=check-item]");
+      let ticked = 0;
+      count.textContent = `0/${items.length}`;
+
+      items.forEach((item) => {
+        gsap.from(item.querySelector("[data-part=tick]"), {
+          drawSVG: "0%",
+          duration: 0.4,
+          scrollTrigger: { trigger: item, start: "top 80%", once: true },
+          onStart: () => {
+            ticked += 1;
+            count.textContent = `${ticked}/${items.length}`;
+          },
+        });
+      });
+
+      return () => {
+        count.textContent = final;
+      };
+    });
+
+    return () => mm.revert();
+  });
+</script>

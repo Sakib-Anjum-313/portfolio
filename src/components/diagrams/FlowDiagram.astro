@@ -35,7 +35,7 @@ const noteFill = {
   fail: "fill-fail",
 };
 
-function edgePath(a: Box, b: Box, route?: "top") {
+function edgePath(a: Box, b: Box, route?: "top" | "down") {
   const acx = a.x + a.w / 2;
   const bcx = b.x + b.w / 2;
   const acy = a.y + a.h / 2;
@@ -44,6 +44,11 @@ function edgePath(a: Box, b: Box, route?: "top") {
   if (route === "top") {
     const ty = Math.min(a.y, b.y) - 32;
     return `M${acx} ${a.y} V${ty} H${bcx} V${b.y}`;
+  }
+  if (route === "down") {
+    const y1 = a.y + a.h;
+    const my = (y1 + b.y) / 2;
+    return `M${acx} ${y1} V${my} H${bcx} V${b.y}`;
   }
   if (b.x >= a.x + a.w || b.x + b.w <= a.x) {
     const rightward = b.x >= a.x + a.w;
@@ -160,6 +165,7 @@ const markerId = `${id}-arrow`;
           </text>
         ))
       }
+      <slot />
     </svg>
   </div>
   <figcaption class:list={showCaption ? "mt-3 text-sm text-muted" : "sr-only"}>{caption}</figcaption>

@@ -1,0 +1,169 @@
+---
+const lanes = [
+  { y: 76, tokens: [{ label: "ORDER", x: 0, w: 68 }, { label: "PUSH", x: 76, w: 60 }], end: 136 },
+  { y: 120, tokens: [{ label: "PUNCH", x: 0, w: 68 }], end: 68 },
+  { y: 164, tokens: [{ label: "VOUCHER", x: 0, w: 84 }, { label: "BILL", x: 92, w: 52 }], end: 144 },
+];
+const SYSTEM_X = 230;
+---
+
+<figure class="m-0 w-full max-w-md" data-part="diagram">
+  <svg viewBox="0 0 340 240" class="block h-auto w-full" aria-hidden="true">
+    <defs>
+      <marker id="hero-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto">
+        <path d="M0 0 L8 4 L0 8 z" class="fill-accent"></path>
+      </marker>
+    </defs>
+
+    {
+      lanes.map((lane) => (
+        <path
+          data-part="lane"
+          data-y={lane.y}
+          d={`M${lane.end} ${lane.y} H${SYSTEM_X}`}
+          fill="none"
+          stroke-width="1.25"
+          class="stroke-accent"
+          marker-end="url(#hero-arrow)"
+        />
+      ))
+    }
+
+    {
+      lanes.map((lane) => (
+        <circle
+          data-part="dot"
+          data-distance={SYSTEM_X - lane.end}
+          cx={lane.end}
+          cy={lane.y}
+          r="2"
+          class="fill-accent opacity-0"
+        />
+      ))
+    }
+
+    {
+      lanes.flatMap((lane) =>
+        lane.tokens.map((t) => (
+          <g data-part="token">
+            <rect x={t.x} y={lane.y - 12} width={t.w} height="24" rx="12" stroke-width="1.25" class="fill-ink-900 stroke-line" />
+            <text x={t.x + t.w / 2} y={lane.y + 4} text-anchor="middle" font-size="12" class="fill-muted font-mono">
+              {t.label}
+            </text>
+          </g>
+        ))
+      )
+    }
+
+    <g data-part="system">
+      <rect x={SYSTEM_X} y="40" width="110" height="160" rx="8" stroke-width="1.25" class="fill-ink-900 stroke-accent" />
+      <text x="285" y="124" text-anchor="middle" font-size="12" class="fill-text font-mono">SYSTEM</text>
+    </g>
+  </svg>
+  <figcaption class="sr-only">
+    Orders, punches, vouchers, bills and push notifications arrive as loose inputs and flow along three
+    lanes into one system.
+  </figcaption>
+</figure>
+
+<script>
+  import { gsap, MQ, ScrollTrigger, SplitText } from "../../lib/gsap";
+  import { onScene } from "../../lib/scene";
+  import { blueprintCursor } from "../../lib/cursor";
+
+  const LABELS = ["ORDER", "PUNCH", "VOUCHER", "PUSH", "BILL"];
+  // Past this the CSS failsafe has already shown the headline, so hiding it again would flash.
+  const LATE_MS = 1200;
+  const VIEWBOX_WIDTH = 340;
+
+  onScene("hero", (root) => {
+    const q = gsap.utils.selector(root);
+    const stopCursor = blueprintCursor(root);
+    const mm = gsap.matchMedia();
+    const late = performance.now() > LATE_MS;
+
+    mm.add({ motion: MQ.motion, desktop: MQ.desktop }, (ctx) => {
+      const { motion, desktop } = ctx.conditions as Record<string, boolean>;
+      if (!motion) return;
+
+      const swarm = q("[data-part=swarm]")[0] as HTMLElement;
+      const lanes = gsap.utils.toArray<SVGPathElement>("[data-part=lane]", root);
+      const area = root.getBoundingClientRect();
+      const svg = q("[data-part=diagram] svg")[0].getBoundingClientRect();
+      const scale = svg.width / VIEWBOX_WIDTH;
+      const scatterHeight = Math.min(area.height, window.innerHeight);
+      const count = desktop ? 24 : 12;
+
+      const tl = gsap.timeline();
+
+      if (!late) {
+        const split = SplitText.create(q("[data-part=headline]"), { type: "words" });
+        tl.from(split.words, { opacity: 0, y: 18, stagger: 0.05, duration: 0.7 }, 0);
+      }
+
+      tl.from(q("[data-part=system]"), { opacity: 0, duration: 0.5 }, 0.1);
+      tl.from(lanes, { drawSVG: "0%", opacity: 0, duration: 0.9, stagger: 0.12, ease: "power1.inOut" }, 0.4);
+      tl.from(q("[data-part=token]"), { opacity: 0, x: -8, stagger: 0.1, duration: 0.4 }, 1.6);
+
+      for (let i = 0; i < count; i++) {
+        const token = document.createElement("span");
+        token.textContent = LABELS[i % LABELS.length];
+        token.className = "absolute left-0 top-0 rounded-full border border-line px-2 font-mono text-xs text-muted";
+        swarm.append(token);
+
+        const laneY = svg.top - area.top + Number(lanes[i % lanes.length].dataset.y) * scale;
+        const entryX = svg.left - area.left + 60 * scale;
+        const systemX = svg.left - area.left + 236 * scale;
+
+        gsap.set(token, {
+          xPercent: -50,
+          yPercent: -50,
+          x: gsap.utils.random(0, area.width),
+          y: gsap.utils.random(0, scatterHeight),
+          opacity: 0,
+        });
+        const start = 0.5 + (i * 0.96) / count;
+        tl.to(token, { opacity: 0.5, duration: 0.3 }, start * 0.3);
+        tl.to(
+          token,
+          {
+            motionPath: { path: [{ x: entryX, y: laneY }, { x: systemX, y: laneY }], curviness: 1 },
+            duration: 0.9,
+            ease: "power2.inOut",
+          },
+          start
+        );
+        tl.to(token, { opacity: 0, duration: 0.25 }, start + 0.65);
+      }
+
+      const loop = gsap.timeline({ paused: true, repeat: -1, repeatDelay: 1.6 });
+      gsap.utils.toArray<SVGCircleElement>("[data-part=dot]", root).forEach((dot, i) => {
+        const at = i * 0.5;
+        const travel = Number(dot.dataset.distance);
+        loop.fromTo(dot, { opacity: 0 }, { opacity: 1, duration: 0.2 }, at);
+        loop.fromTo(dot, { x: 0 }, { x: travel, duration: 1.6, ease: "none" }, at);
+        loop.to(dot, { opacity: 0, duration: 0.2 }, at + 1.4);
+      });
+      tl.eventCallback("onComplete", () => {
+        swarm.replaceChildren();
+        loop.play();
+      });
+      // No point pulsing while the hero is off screen.
+      ScrollTrigger.create({
+        trigger: root,
+        onToggle: (self) => {
+          if (tl.progress() === 1) loop.paused(!self.isActive);
+        },
+      });
+
+      return () => swarm.replaceChildren();
+    });
+
+    q("[data-prehide]").forEach((el) => el.setAttribute("data-ready", ""));
+
+    return () => {
+      mm.revert();
+      stopCursor();
+    };
+  });
+</script>
