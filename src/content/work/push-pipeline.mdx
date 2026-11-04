@@ -1,0 +1,21 @@
+---
+title: Push Notification Pipeline
+slug: push-pipeline
+tagline: Notifications for 5M+ users without taking the server down.
+role: Designed and built
+stack: [Python, Celery, Redis, PostgreSQL, Firebase Cloud Messaging]
+metric: 5M+ users
+# TODO(sakib): the brief does not assign filter categories; confirm.
+category: [Backend]
+order: 1
+cover: /images/covers/push-pipeline.svg
+problem: Notifications were sent by looping over users inside the API request. Under heavy traffic the request blocked, the server sometimes crashed, and Firebase rejected bursts with too-many-requests errors.
+design: The API stores the job in a queue and immediately responds that the schedule is set. Celery workers on Redis, backed by PostgreSQL, drain the queue. Under heavy traffic, more workers are added; when it drops, workers are reduced.
+result: "The API never blocks. A traffic spike makes the queue longer instead of crashing the server. TODO(sakib): add send time or messages per minute."
+# TODO(sakib): key decisions are drafts; confirm wording.
+decisions:
+  - "A queue instead of more servers: cheaper, and it absorbs spikes instead of failing under them."
+  - "Respond first, send later: the caller gets an answer in milliseconds regardless of audience size."
+  - "Scale workers, not the API: capacity follows load, and the web tier stays fast for shoppers."
+alsoCovers: Order API 1.2s → 0.4s via query optimization, PostgreSQL indexing and caching.
+---

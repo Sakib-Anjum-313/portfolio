@@ -1,0 +1,36 @@
+---
+title: Biometric Attendance Backend
+slug: attendance-backend
+tagline: Hardware is unreliable and HR data is evidence. Every step is replayable, auditable and safe to retry.
+role: Designed the architecture and backend
+stack: [FastAPI, PostgreSQL, Alembic, Nginx, AWS EC2]
+device: ZKTeco SenseFace 2A
+# TODO(sakib): update status when live.
+status: MVP built; hardware certification in progress.
+metric: Direct device integration, no vendor middleware
+# TODO(sakib): the brief does not assign filter categories; confirm.
+category: [Backend, Integrations]
+order: 2
+cover: /images/covers/attendance-backend.svg
+problems:
+  - problem: Device re-sends the same upload
+    answer: exact replays deduplicated; device gets OK only after the batch commits.
+  - problem: Accidental double scan
+    answer: kept as evidence; counts as checkout only after the shift's minimum gap.
+  - problem: Terminal offline, uploads hours later
+    answer: late punches recalculate the finalized day.
+  - problem: HR already corrected a day
+    answer: the override stays; the day is flagged "Review required".
+  - problem: Shift rules change
+    answer: immutable, effective-dated shift revisions; past days keep their rules.
+  - problem: Employee leaves
+    answer: identity disabled or deleted on terminals via a command queue.
+  - problem: Privacy
+    answer: no face or fingerprint templates or photos stored in the ERP.
+design: "terminal → PUSH receiver → immutable raw event + work item (one transaction) → single advisory-locked worker → daily result → 7 reports. Bounded retry, crash recovery, heartbeat."
+# TODO(sakib): key decisions are drafts; confirm wording.
+decisions:
+  - "One locked worker instead of many: correctness first; multi-worker scaling waits until it can be proven safe."
+  - "Raw evidence is immutable; everything else is derived and can be recalculated."
+  - "Verify, don't trust: an AI-suggested device-authentication flow was checked against the device documentation and dropped before implementation because the hardware doesn't support it."
+---

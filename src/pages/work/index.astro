@@ -1,9 +1,22 @@
 ---
+import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const work = (await getCollection("work")).sort((a, b) => a.data.order - b.data.order);
 ---
 
 <BaseLayout title="Work">
   <section class="mx-auto w-full max-w-6xl px-6 py-24 md:px-10 md:py-32">
     <h1 class="text-4xl font-semibold tracking-tight">Work</h1>
+    <ul class="mt-8 space-y-2">
+      {
+        work.map((entry) => (
+          <li>
+            <a href={`/work/${entry.id}`} class="text-accent">{entry.data.title}</a>
+            <span class="text-muted"> · {entry.data.metric}</span>
+          </li>
+        ))
+      }
+    </ul>
   </section>
 </BaseLayout>

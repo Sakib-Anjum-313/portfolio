@@ -1,0 +1,13 @@
+company: Coders Lab Limited
+title: Software Engineer
+start: Dec 2023
+end: Jul 2025
+summary: "Built manufacturing ERP workflows for HKD International (CEPZ) Ltd: Bill of Materials, Master and Supplier Purchase Orders, materials control and production planning. Spent two months at the factory mapping real processes into software."
+metric: 2 months onsite
+tech:
+  - React
+  - TypeScript
+  - Laravel
+  - Node.js
+  - PostgreSQL
+order: 2

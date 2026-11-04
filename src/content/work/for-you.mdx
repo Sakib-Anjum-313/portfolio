@@ -1,0 +1,21 @@
+---
+title: '"For You" Recommendation Engine'
+slug: for-you
+tagline: A personal feed for every shopper, steerable by the business.
+role: Designed and built
+stack: [FastAPI, PostgreSQL, Next.js, React Native]
+metric: Hybrid ranking
+# TODO(sakib): the brief does not assign filter categories; confirm.
+category: [Full stack]
+order: 3
+cover: /images/covers/for-you.svg
+# TODO(sakib): problem is a draft; confirm wording.
+problem: Every shopper saw the same home page and category order, and merchandising had no way to promote products to the right people.
+design: Hybrid scoring from recent searches, product views, cart, orders and category affinity, plus admin-boosted products. One API serves web and mobile.
+result: "TODO(sakib): add CTR or share of orders from the feed."
+# TODO(sakib): key decisions are drafts; confirm wording.
+decisions:
+  - "Transparent scoring over ML: works from day one and can be tuned by the business."
+  - "Admin boost built in, so merchandising and personalization work together."
+  - "Designed so a learned ranker can replace the scoring step later."
+---

@@ -1,0 +1,30 @@
+company: Govaly Pvt Ltd
+title: Full Stack Software Engineer / Team Lead
+start: Jul 2025
+end: Present
+url: https://govaly.com.bd
+summary: Lead a team of 4 on Govaly, a multi-vendor e-commerce marketplace, and on client ERP systems. Main lead for the mobile app and customer website (homepage, search, category and profile pages). Own architecture, releases and production.
+highlights:
+  - Re-architected push notifications for a 5M+ user base into an async Redis / Celery queue pipeline.
+  - Built the "For You" hybrid recommendation engine for web and mobile.
+  - Cut Order API response time ~67% (1.2s → 0.4s).
+  - Architected the C&F ERP and its biometric attendance backend for Standard Freight Incorporation (150+ staff).
+  - Improved Google Analytics and Facebook Ads tracking.
+  - "Built the team's AI-assisted workflow: context docs, custom review skills, diff-first verification."
+metric: 5M+ users
+caseStudies:
+  - push-pipeline
+  - attendance-backend
+  - for-you
+  - cf-erp
+tech:
+  - FastAPI
+  - PostgreSQL
+  - Redis
+  - Celery
+  - Next.js
+  - React Native
+  - Meilisearch
+  - Docker
+  - AWS
+order: 1

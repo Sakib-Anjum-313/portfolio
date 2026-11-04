@@ -1,9 +1,30 @@
 ---
+import { getCollection } from "astro:content";
+import { Image } from "astro:assets";
 import BaseLayout from "../layouts/BaseLayout.astro";
+import photo from "../assets/my-image.png";
+
+const roles = (await getCollection("experience")).sort((a, b) => a.data.order - b.data.order);
 ---
 
 <BaseLayout title="Experience">
   <section class="mx-auto w-full max-w-6xl px-6 py-24 md:px-10 md:py-32">
     <h1 class="text-4xl font-semibold tracking-tight">Experience</h1>
+    <Image
+      src={photo}
+      alt="Portrait of Sakib Anjum, arms crossed, in a dark green shirt"
+      width={320}
+      class="mt-8 h-auto w-40"
+    />
+    <ul class="mt-8 space-y-2">
+      {
+        roles.map((role) => (
+          <li>
+            {role.data.title} · {role.data.company}
+            <span class="text-muted font-mono"> · {role.data.start} — {role.data.end}</span>
+          </li>
+        ))
+      }
+    </ul>
   </section>
 </BaseLayout>

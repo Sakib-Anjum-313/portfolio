@@ -1,17 +1,20 @@
 ---
+import { getCollection, render } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 
-export function getStaticPaths() {
-  return ["push-pipeline", "attendance-backend", "for-you", "cf-erp"].map((slug) => ({
-    params: { slug },
-  }));
+export async function getStaticPaths() {
+  const work = await getCollection("work");
+  return work.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
 }
 
-const { slug } = Astro.params;
+const { entry } = Astro.props;
+const { Content } = await render(entry);
 ---
 
-<BaseLayout title="Work">
+<BaseLayout title={entry.data.title}>
   <section class="mx-auto w-full max-w-6xl px-6 py-24 md:px-10 md:py-32">
-    <h1 class="text-4xl font-semibold tracking-tight">{slug}</h1>
+    <h1 class="text-4xl font-semibold tracking-tight">{entry.data.title}</h1>
+    <p class="mt-4 text-muted">{entry.data.tagline}</p>
+    <Content />
   </section>
 </BaseLayout>
