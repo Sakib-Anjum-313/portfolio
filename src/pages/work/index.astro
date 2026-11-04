@@ -3,6 +3,7 @@ import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import MetricBadge from "../../components/ui/MetricBadge.astro";
 import Pill from "../../components/ui/Pill.astro";
+import CaseStudyCue from "../../components/ui/CaseStudyCue.astro";
 import FlowDiagram from "../../components/diagrams/FlowDiagram.astro";
 import { miniPush, miniAttendance, miniForYou, miniCfErp } from "../../components/diagrams/specs";
 import type { FlowSpec } from "../../components/diagrams/specs";
@@ -41,19 +42,19 @@ const previews: Record<string, FlowSpec> = {
     </div>
 
     <div data-part="list" class="relative mt-12">
-      <ol class="border-t border-line">
+      <ol class="flex flex-col gap-4 lg:block lg:border-t lg:border-line">
         {
           work.map((entry, i) => (
-            <li data-category={entry.data.category.join("|")} data-slug={entry.id} class="border-b border-line">
+            <li data-category={entry.data.category.join("|")} data-slug={entry.id} class="lg:border-b lg:border-line">
               <a
                 href={withBase(`/work/${entry.id}`)}
-                class="group grid gap-6 py-8 transition-colors hover:bg-ink-900/70 focus-visible:bg-ink-900/70 md:grid-cols-[3rem_1fr_16rem] md:px-4"
+                class="group grid gap-6 rounded-lg border border-line bg-ink-900 p-6 transition-colors hover:border-accent/40 hover:bg-ink-800 focus-visible:border-accent/40 focus-visible:bg-ink-800 active:border-accent/40 active:bg-ink-800 md:grid-cols-[3rem_1fr_16rem] lg:rounded-none lg:border-0 lg:bg-transparent lg:px-4 lg:py-8 lg:hover:bg-ink-900/70 lg:focus-visible:bg-ink-900/70 lg:active:bg-ink-900/70"
               >
                 <p class="font-mono text-sm tabular-nums text-muted">{String(i + 1).padStart(2, "0")}</p>
                 <div>
                   <h2
                     transition:name={`work-title-${entry.id}`}
-                    class="text-2xl font-semibold tracking-[-0.02em] group-hover:text-accent group-focus-visible:text-accent"
+                    class="text-2xl font-semibold tracking-[-0.02em] group-hover:text-accent group-focus-visible:text-accent group-active:text-accent"
                   >
                     {entry.data.title}
                   </h2>
@@ -77,6 +78,7 @@ const previews: Record<string, FlowSpec> = {
                   loading="lazy"
                   class="h-auto w-full rounded-lg border border-line md:self-start"
                 />
+                <CaseStudyCue class="col-span-full lg:hidden" />
               </a>
             </li>
           ))

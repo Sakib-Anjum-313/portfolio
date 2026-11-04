@@ -3,6 +3,7 @@ import { getEntry } from "astro:content";
 import SectionLabel from "../ui/SectionLabel.astro";
 import Card from "../ui/Card.astro";
 import MetricBadge from "../ui/MetricBadge.astro";
+import CaseStudyCue from "../ui/CaseStudyCue.astro";
 import FlowDiagram from "../diagrams/FlowDiagram.astro";
 import { miniPush, miniAttendance, miniForYou } from "../diagrams/specs";
 import { withBase } from "../../data/site";
@@ -31,7 +32,7 @@ const entries = await Promise.all(
           <Card href={withBase(`/work/${entry.id}`)} class="flex h-full flex-col gap-6">
             <h3
               transition:name={`work-title-${entry.id}`}
-              class="text-xl font-semibold tracking-[-0.02em] group-hover:text-accent group-focus-visible:text-accent"
+              class="text-xl font-semibold tracking-[-0.02em] group-hover:text-accent group-focus-visible:text-accent group-active:text-accent"
             >
               {entry.data.title}
             </h3>
@@ -40,7 +41,7 @@ const entries = await Promise.all(
               <MetricBadge>{entry.data.metric}</MetricBadge>
             </div>
             <FlowDiagram id={`mini-${entry.id}`} spec={spec} caption={caption} class="mt-auto" />
-            <span aria-hidden="true" class="text-sm text-accent">Read the case study →</span>
+            <CaseStudyCue />
           </Card>
         </li>
       ))

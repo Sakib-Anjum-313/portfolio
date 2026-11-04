@@ -1,0 +1,20 @@
+---
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<!-- Below lg it fills the foot of a p-6 card, so a whole-card link reads as tappable without hover. -->
+<span
+  aria-hidden="true"
+  class:list={[
+    "-mx-6 -mb-6 flex min-h-12 items-center justify-between rounded-b-lg border-t border-accent/40 bg-accent/10 px-6 py-3 text-sm font-medium text-accent transition-colors group-active:bg-accent/20 motion-reduce:transition-none",
+    "lg:mx-0 lg:mb-0 lg:min-h-0 lg:justify-start lg:gap-1 lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0 lg:font-normal lg:group-active:bg-transparent",
+    className,
+  ]}
+>
+  Read the case study
+  <span class="inline-block text-base transition-transform group-active:translate-x-0.5 motion-reduce:transition-none lg:text-sm">→</span>
+</span>
