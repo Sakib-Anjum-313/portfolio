@@ -18,9 +18,21 @@
 }
 
 @layer base {
+  :root {
+    /* Height of the sticky nav. Sticky panels and anchor jumps start below it. */
+    --nav-h: 5.5rem;
+  }
+
+  @media (min-width: 768px) {
+    :root {
+      --nav-h: 3.75rem;
+    }
+  }
+
   html {
     color-scheme: dark;
     background-color: var(--color-ink-950);
+    scroll-padding-top: var(--nav-h);
   }
 
   /* Blueprint grid: two 1px line gradients on 32px cells. */

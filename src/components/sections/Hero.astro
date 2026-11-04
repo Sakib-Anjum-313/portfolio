@@ -15,13 +15,13 @@ import HeroScene from "../scenes/HeroScene.astro";
           <span class="size-1.5 rounded-full bg-ok" aria-hidden="true"></span>
           {hero.availability}
         </p>
-        <h1
+        <h2
           data-part="headline"
           data-prehide
           class="mt-6 text-[clamp(2.5rem,6vw,4.75rem)] font-semibold leading-[1.05] tracking-[-0.03em]"
         >
           {hero.headline}
-        </h1>
+        </h2>
         <p class="mt-6 max-w-[65ch] text-lg text-muted">{hero.subline}</p>
         <div class="mt-10 flex flex-wrap gap-4">
           <Button href={hero.primaryCta.href}>{hero.primaryCta.label}</Button>

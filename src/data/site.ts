@@ -1,6 +1,7 @@
 export const site = {
   name: "Sakib Anjum",
   role: "Full Stack Engineer & Team Lead",
+  city: "Chattogram, Bangladesh",
   location: "Chattogram, Bangladesh · open to remote (UTC+6), targeting US and Europe",
   email: "sakibanjum.313@gmail.com",
   linkedin: "https://linkedin.com/in/sakib-anjum-cse",
