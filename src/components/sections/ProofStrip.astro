@@ -1,0 +1,21 @@
+---
+import { proof } from "../../data/site";
+import MetricCounter from "../ui/MetricCounter.astro";
+import LatencyBar from "../diagrams/LatencyBar.astro";
+---
+
+<section aria-label="Proof" class="border-y border-line bg-ink-900/70">
+  <div class="mx-auto w-full max-w-6xl px-6 py-12 md:px-10">
+    <ul class="grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-5">
+      {
+        proof.map((item) => (
+          <li>
+            <MetricCounter value={item.value} label={item.label}>
+              {item.value === "67%" && <LatencyBar compact />}
+            </MetricCounter>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>

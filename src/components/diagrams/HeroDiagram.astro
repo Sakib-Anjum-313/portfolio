@@ -1,0 +1,52 @@
+---
+const lanes = [
+  { y: 76, tokens: [{ label: "ORDER", x: 0, w: 68 }, { label: "PUSH", x: 76, w: 60 }], end: 136 },
+  { y: 120, tokens: [{ label: "PUNCH", x: 0, w: 68 }], end: 68 },
+  { y: 164, tokens: [{ label: "VOUCHER", x: 0, w: 84 }, { label: "BILL", x: 92, w: 52 }], end: 144 },
+];
+---
+
+<figure class="m-0 w-full max-w-md">
+  <svg viewBox="0 0 340 240" class="block h-auto w-full" aria-hidden="true">
+    <defs>
+      <marker id="hero-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto">
+        <path d="M0 0 L8 4 L0 8 z" class="fill-accent"></path>
+      </marker>
+    </defs>
+
+    {
+      lanes.map((lane) => (
+        <path
+          data-part="lane"
+          d={`M${lane.end} ${lane.y} H230`}
+          fill="none"
+          stroke-width="1.25"
+          class="stroke-accent"
+          marker-end="url(#hero-arrow)"
+        />
+      ))
+    }
+
+    {
+      lanes.flatMap((lane) =>
+        lane.tokens.map((t) => (
+          <g data-part="token">
+            <rect x={t.x} y={lane.y - 12} width={t.w} height="24" rx="12" stroke-width="1.25" class="fill-ink-900 stroke-line" />
+            <text x={t.x + t.w / 2} y={lane.y + 4} text-anchor="middle" font-size="12" class="fill-muted font-mono">
+              {t.label}
+            </text>
+          </g>
+        ))
+      )
+    }
+
+    <g data-part="system">
+      <rect x="230" y="40" width="110" height="160" rx="8" stroke-width="1.25" class="fill-ink-900 stroke-accent" />
+      <text x="285" y="124" text-anchor="middle" font-size="12" class="fill-text font-mono">SYSTEM</text>
+    </g>
+  </svg>
+  <figcaption class="sr-only">
+    Orders, punches, vouchers, bills and push notifications arrive as loose inputs and flow along three
+    lanes into one system.
+  </figcaption>
+</figure>

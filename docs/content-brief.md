@@ -206,4 +206,4 @@ I learned early that software only works when it matches how people actually wor
 
 ## Credits
 
-Footer line: "Experience layout inspired by Brittany Chiang." (links to https://brittanychiang.com)
+None. The footer has no credit line (Sakib asked to remove "Experience layout inspired by Brittany Chiang." on 2026-11-04).

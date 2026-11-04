@@ -1,0 +1,131 @@
+---
+import { getCollection } from "astro:content";
+import MetricBadge from "../ui/MetricBadge.astro";
+import Pill from "../ui/Pill.astro";
+
+interface Props {
+  /** Home preview: summary, metric and tech only. */
+  compact?: boolean;
+}
+
+const { compact = false } = Astro.props;
+
+const roles = (await getCollection("experience")).sort((a, b) => a.data.order - b.data.order);
+const work = await getCollection("work");
+const workTitle = Object.fromEntries(work.map((w) => [w.id, w.data.title]));
+
+const VISIBLE = 4;
+---
+
+<ol class="xp-list space-y-2">
+  {
+    roles.map((role) => {
+      const { data } = role;
+      const shown = data.highlights.slice(0, VISIBLE);
+      const more = data.highlights.slice(VISIBLE);
+      return (
+        <li class="xp-card group rounded-lg border border-transparent p-5 transition-colors hover:border-line hover:bg-ink-900 focus-within:border-line focus-within:bg-ink-900">
+          <div class="grid gap-3 sm:grid-cols-[10rem_1fr] sm:gap-6">
+            <p class="whitespace-nowrap pt-1 font-mono text-xs uppercase tracking-wide text-muted">
+              {data.start} — {data.end}
+            </p>
+            <div>
+              <h3 class="text-lg font-semibold tracking-[-0.02em]">
+                {data.url ? (
+                  <a
+                    href={data.url}
+                    class="inline-flex items-baseline gap-1 group-hover:text-accent group-focus-within:text-accent"
+                  >
+                    {data.title} · {data.company}
+                    <span
+                      aria-hidden="true"
+                      class="inline-block text-base transition-transform motion-reduce:transition-none group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-focus-within:-translate-y-0.5 group-focus-within:translate-x-0.5"
+                    >
+                      ↗
+                    </span>
+                  </a>
+                ) : (
+                  <span class="group-hover:text-accent group-focus-within:text-accent">
+                    {data.title} · {data.company}
+                  </span>
+                )}
+              </h3>
+              <p class="mt-3 text-muted">{data.summary}</p>
+
+              {
+                !compact && shown.length > 0 && (
+                  <ul class="mt-4 list-disc space-y-2 pl-5 text-sm text-muted marker:text-accent">
+                    {shown.map((h) => (
+                      <li>{h}</li>
+                    ))}
+                  </ul>
+                )
+              }
+              {
+                !compact && more.length > 0 && (
+                  <details class="mt-2 text-sm">
+                    <summary class="cursor-pointer text-accent hover:text-text">
+                      Show {more.length} more
+                    </summary>
+                    <ul class="mt-2 list-disc space-y-2 pl-5 text-muted marker:text-accent">
+                      {more.map((h) => (
+                        <li>{h}</li>
+                      ))}
+                    </ul>
+                  </details>
+                )
+              }
+
+              <div class="mt-4">
+                <MetricBadge>{data.metric}</MetricBadge>
+              </div>
+
+              {
+                !compact && data.caseStudies.length > 0 && (
+                  <ul class="mt-4 flex flex-wrap gap-2" aria-label="Case studies">
+                    {data.caseStudies.map((ref) => (
+                      <li>
+                        <a
+                          href={`/work/${ref.id}`}
+                          class="inline-block rounded-full border border-line px-3 py-1 text-xs text-muted transition-colors hover:border-accent/40 hover:text-text focus-visible:border-accent/40 focus-visible:text-text"
+                        >
+                          {workTitle[ref.id]}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                )
+              }
+
+              <ul class="mt-4 flex flex-wrap gap-2" aria-label="Tech">
+                {data.tech.map((t) => (
+                  <li>
+                    <Pill>{t}</Pill>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </li>
+      );
+    })
+  }
+</ol>
+
+<style>
+  /* Desktop only: dim the other cards while one is hovered or focused. */
+  @media (min-width: 1024px) {
+    .xp-list:is(:hover, :focus-within) .xp-card:not(:hover, :focus-within) {
+      opacity: 0.5;
+    }
+  }
+  .xp-card {
+    transition-property: background-color, border-color, opacity;
+    transition-duration: 150ms;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .xp-card {
+      transition: none;
+    }
+  }
+</style>

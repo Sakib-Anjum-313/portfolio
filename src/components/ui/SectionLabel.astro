@@ -1,0 +1,14 @@
+---
+interface Props {
+  index?: string;
+  name: string;
+  as?: "h2" | "p";
+  class?: string;
+}
+
+const { index, name, as: Tag = "h2", class: className } = Astro.props;
+---
+
+<Tag class:list={["font-mono text-xs uppercase tracking-[0.18em] text-accent", className]}>
+  {index ? `${index} / ${name}` : name}
+</Tag>

@@ -1,30 +1,123 @@
 ---
-import { getCollection } from "astro:content";
 import { Image } from "astro:assets";
 import BaseLayout from "../layouts/BaseLayout.astro";
+import ExperienceList from "../components/sections/ExperienceList.astro";
+import SectionLabel from "../components/ui/SectionLabel.astro";
+import ArrowLink from "../components/ui/ArrowLink.astro";
+import Button from "../components/ui/Button.astro";
 import photo from "../assets/my-image.png";
+import { site, about, skills, education } from "../data/site";
 
-const roles = (await getCollection("experience")).sort((a, b) => a.data.order - b.data.order);
+const navItems = [
+  { label: "Experience", href: "#experience" },
+  { label: "Skills", href: "#skills" },
+  { label: "Education", href: "#education" },
+];
 ---
 
 <BaseLayout title="Experience">
-  <section class="mx-auto w-full max-w-6xl px-6 py-24 md:px-10 md:py-32">
-    <h1 class="text-4xl font-semibold tracking-tight">Experience</h1>
-    <Image
-      src={photo}
-      alt="Portrait of Sakib Anjum, arms crossed, in a dark green shirt"
-      width={320}
-      class="mt-8 h-auto w-40"
-    />
-    <ul class="mt-8 space-y-2">
-      {
-        roles.map((role) => (
-          <li>
-            {role.data.title} · {role.data.company}
-            <span class="text-muted font-mono"> · {role.data.start} — {role.data.end}</span>
-          </li>
-        ))
-      }
-    </ul>
-  </section>
+  <div class="mx-auto w-full max-w-6xl px-6 md:px-10">
+    <div class="lg:flex lg:justify-between lg:gap-16">
+      <header
+        class="py-16 lg:sticky lg:top-0 lg:flex lg:max-h-screen lg:w-[40%] lg:flex-col lg:justify-between lg:overflow-y-auto lg:py-20"
+      >
+        <div>
+          <h1 class="text-4xl font-semibold tracking-[-0.02em] md:text-5xl">{site.name}</h1>
+          <p class="mt-3 text-lg text-text">{site.role}</p>
+          <p class="mt-4 max-w-xs text-muted">{site.positioning}</p>
+
+          <div class="relative mt-8 w-44">
+            <div
+              aria-hidden="true"
+              class="absolute left-1/2 top-4 size-36 -translate-x-1/2 rounded-full border border-accent/60"
+            >
+            </div>
+            <Image
+              src={photo}
+              alt="Portrait of Sakib Anjum, arms crossed, in a dark green shirt"
+              width={352}
+              height={397}
+              loading="eager"
+              class="relative h-auto w-44"
+            />
+          </div>
+
+          <nav aria-label="On this page" class="mt-10">
+            <ul class="space-y-3 font-mono text-xs uppercase tracking-[0.18em]">
+              {
+                navItems.map((item) => (
+                  <li>
+                    <a
+                      href={item.href}
+                      class="group inline-flex items-center gap-3 text-muted hover:text-text focus-visible:text-text"
+                    >
+                      <span
+                        aria-hidden="true"
+                        class="h-px w-8 bg-line transition-all group-hover:w-16 group-hover:bg-accent group-focus-visible:w-16 group-focus-visible:bg-accent motion-reduce:transition-none"
+                      />
+                      {item.label}
+                    </a>
+                  </li>
+                ))
+              }
+            </ul>
+          </nav>
+        </div>
+
+        <div class="mt-10 flex flex-wrap items-center gap-x-6 gap-y-4 lg:mt-12">
+          <a
+            href={site.github}
+            class="text-sm text-muted transition-colors hover:text-text focus-visible:text-text"
+          >
+            GitHub ↗
+          </a>
+          <a
+            href={site.linkedin}
+            class="text-sm text-muted transition-colors hover:text-text focus-visible:text-text"
+          >
+            LinkedIn ↗
+          </a>
+          <Button href={site.resume} newTab>Resume</Button>
+        </div>
+      </header>
+
+      <div class="space-y-24 pb-24 lg:w-[55%] lg:py-20">
+        <section>
+          <SectionLabel name="About" class="mb-6" />
+          <p class="max-w-[65ch] text-muted">{about}</p>
+        </section>
+
+        <section id="experience" class="scroll-mt-8">
+          <SectionLabel name="Experience" class="mb-6" />
+          <ExperienceList />
+        </section>
+
+        <section id="skills" class="scroll-mt-8">
+          <SectionLabel name="Skills" class="mb-6" />
+          <dl class="space-y-6">
+            {
+              skills.map((s) => (
+                <div class="grid gap-1 sm:grid-cols-[9rem_1fr] sm:gap-6">
+                  <dt class="font-mono text-xs uppercase tracking-wide text-muted">{s.group}</dt>
+                  <dd class="text-text">{s.items.join(", ")}</dd>
+                </div>
+              ))
+            }
+          </dl>
+        </section>
+
+        <section id="education" class="scroll-mt-8">
+          <SectionLabel name="Education & learning" class="mb-6" />
+          <p class="max-w-[65ch] text-text">{education.degree}</p>
+          <ul class="mt-4 list-disc space-y-2 pl-5 text-muted marker:text-accent">
+            {education.learning.map((item) => <li>{item}</li>)}
+          </ul>
+        </section>
+
+        <p>
+          <ArrowLink href={site.resume} external newTab>View full résumé</ArrowLink>
+        </p>
+      </div>
+    </div>
+  </div>
 </BaseLayout>

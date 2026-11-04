@@ -1,0 +1,23 @@
+---
+interface Props {
+  href?: string;
+  class?: string;
+}
+
+const { href, class: className } = Astro.props;
+const base = "block rounded-lg border border-line bg-ink-900 p-6";
+const interactive =
+  "transition-colors hover:border-accent/40 hover:bg-ink-800 focus-visible:border-accent/40 focus-visible:bg-ink-800";
+---
+
+{
+  href ? (
+    <a href={href} class:list={[base, interactive, "group", className]}>
+      <slot />
+    </a>
+  ) : (
+    <div class:list={[base, className]}>
+      <slot />
+    </div>
+  )
+}

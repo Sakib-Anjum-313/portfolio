@@ -7,11 +7,6 @@ export const site = {
   github: "https://github.com/Sakib-Anjum-313",
   resume: "/Sakib_Anjum_Resume.pdf",
   positioning: "I turn complex business operations into reliable software systems.",
-  credit: {
-    text: "Experience layout inspired by",
-    name: "Brittany Chiang",
-    href: "https://brittanychiang.com",
-  },
 } as const;
 
 export const nav = [

@@ -1,0 +1,45 @@
+---
+import { getEntry } from "astro:content";
+import SectionLabel from "../ui/SectionLabel.astro";
+import Card from "../ui/Card.astro";
+import MetricBadge from "../ui/MetricBadge.astro";
+import FlowDiagram from "../diagrams/FlowDiagram.astro";
+import { miniPush, miniAttendance, miniForYou } from "../diagrams/specs";
+
+const featured = [
+  { slug: "push-pipeline", spec: miniPush, caption: "A request enters a queue and workers drain it." },
+  {
+    slug: "attendance-backend",
+    spec: miniAttendance,
+    caption: "A punch becomes stored evidence, and reports are derived from it.",
+  },
+  { slug: "for-you", spec: miniForYou, caption: "Shopper signals feed a score that orders the feed." },
+];
+
+const entries = await Promise.all(
+  featured.map(async (f) => ({ ...f, entry: (await getEntry("work", f.slug))! }))
+);
+---
+
+<section class="mx-auto w-full max-w-6xl px-6 py-24 md:px-10 md:py-32">
+  <SectionLabel index="01" name="SYSTEMS" />
+  <ul class="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+    {
+      entries.map(({ entry, spec, caption }) => (
+        <li>
+          <Card href={`/work/${entry.id}`} class="flex h-full flex-col gap-6">
+            <h3 class="text-xl font-semibold tracking-[-0.02em] group-hover:text-accent group-focus-visible:text-accent">
+              {entry.data.title}
+            </h3>
+            <p class="text-muted">{entry.data.tagline}</p>
+            <div>
+              <MetricBadge>{entry.data.metric}</MetricBadge>
+            </div>
+            <FlowDiagram id={`mini-${entry.id}`} spec={spec} caption={caption} class="mt-auto" />
+            <span aria-hidden="true" class="text-sm text-accent">Read the case study →</span>
+          </Card>
+        </li>
+      ))
+    }
+  </ul>
+</section>

@@ -3,6 +3,7 @@ import "@fontsource-variable/inter";
 import "@fontsource-variable/jetbrains-mono";
 import "../styles/global.css";
 import { site, nav as navLinks } from "../data/site";
+import CopyEmail from "../components/ui/CopyEmail.astro";
 
 interface Props {
   title?: string;
@@ -11,7 +12,7 @@ interface Props {
 const { title } = Astro.props;
 const pageTitle = title ? `${title} · ${site.name}` : site.name;
 
-const { email, linkedin, github, resume, credit } = site;
+const { email, linkedin, github, resume } = site;
 
 const path = Astro.url.pathname.replace(/\/$/, "");
 const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`);
@@ -93,13 +94,7 @@ const linkClass =
           >
             {email}
           </a>
-          <button
-            type="button"
-            data-copy-email={email}
-            class="rounded-full border border-line px-4 py-1 text-sm text-muted transition-colors hover:border-accent/40 hover:text-text focus-visible:border-accent/40 focus-visible:text-text"
-          >
-            Copy email
-          </button>
+          <CopyEmail email={email} />
           <a
             href={linkedin}
             class="text-muted transition-colors hover:text-text focus-visible:text-text"
@@ -121,30 +116,7 @@ const linkClass =
             Resume ↗
           </a>
         </div>
-        <p class="text-sm text-muted">
-          {credit.text} <a
-            href={credit.href}
-            class="text-text underline decoration-line underline-offset-4 transition-colors hover:decoration-accent focus-visible:decoration-accent"
-            >{credit.name}</a
-          >.
-        </p>
       </div>
     </footer>
-
-    <script>
-      document
-        .querySelectorAll<HTMLButtonElement>("[data-copy-email]")
-        .forEach((button) => {
-          button.addEventListener("click", async () => {
-            try {
-              await navigator.clipboard.writeText(button.dataset.copyEmail ?? "");
-              button.textContent = "Copied";
-              setTimeout(() => (button.textContent = "Copy email"), 2000);
-            } catch {
-              button.textContent = "Copy failed";
-            }
-          });
-        });
-    </script>
   </body>
 </html>

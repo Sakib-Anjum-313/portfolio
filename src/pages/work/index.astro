@@ -1,22 +1,90 @@
 ---
 import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import MetricBadge from "../../components/ui/MetricBadge.astro";
+import Pill from "../../components/ui/Pill.astro";
 
 const work = (await getCollection("work")).sort((a, b) => a.data.order - b.data.order);
+const filters = ["All", "Backend", "Full stack", "Integrations"];
 ---
 
 <BaseLayout title="Work">
   <section class="mx-auto w-full max-w-6xl px-6 py-24 md:px-10 md:py-32">
-    <h1 class="text-4xl font-semibold tracking-tight">Work</h1>
-    <ul class="mt-8 space-y-2">
+    <h1 class="text-4xl font-semibold tracking-[-0.02em] md:text-5xl">Work</h1>
+    <p class="mt-4 max-w-[65ch] text-lg text-muted">
+      Systems I designed and built, and the problems they solved.
+    </p>
+
+    <div data-filters hidden class="mt-10 flex flex-wrap gap-2" role="group" aria-label="Filter by category">
       {
-        work.map((entry) => (
-          <li>
-            <a href={`/work/${entry.id}`} class="text-accent">{entry.data.title}</a>
-            <span class="text-muted"> · {entry.data.metric}</span>
+        filters.map((f) => (
+          <button
+            type="button"
+            data-filter={f}
+            aria-pressed={f === "All" ? "true" : "false"}
+            class="rounded-full border border-line px-4 py-1.5 text-sm text-muted transition-colors hover:border-accent/40 hover:text-text focus-visible:border-accent/40 focus-visible:text-text aria-pressed:border-accent aria-pressed:text-accent"
+          >
+            {f}
+          </button>
+        ))
+      }
+    </div>
+
+    <ol class="mt-12 border-t border-line">
+      {
+        work.map((entry, i) => (
+          <li data-category={entry.data.category.join("|")} class="border-b border-line">
+            <a
+              href={`/work/${entry.id}`}
+              class="group grid gap-6 py-8 transition-colors hover:bg-ink-900/70 focus-visible:bg-ink-900/70 md:grid-cols-[3rem_1fr_16rem] md:px-4"
+            >
+              <p class="font-mono text-sm tabular-nums text-muted">{String(i + 1).padStart(2, "0")}</p>
+              <div>
+                <h2 class="text-2xl font-semibold tracking-[-0.02em] group-hover:text-accent group-focus-visible:text-accent">
+                  {entry.data.title}
+                </h2>
+                <p class="mt-2 max-w-[65ch] text-muted">{entry.data.tagline}</p>
+                <div class="mt-4">
+                  <MetricBadge>{entry.data.metric}</MetricBadge>
+                </div>
+                <ul class="mt-4 flex flex-wrap gap-2" aria-label="Stack">
+                  {entry.data.stack.map((s) => (
+                    <li>
+                      <Pill>{s}</Pill>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <img
+                src={entry.data.cover}
+                alt={`Blueprint cover for ${entry.data.title}`}
+                width="800"
+                height="450"
+                loading="lazy"
+                class="h-auto w-full rounded-lg border border-line md:self-start"
+              />
+            </a>
           </li>
         ))
       }
-    </ul>
+    </ol>
   </section>
 </BaseLayout>
+
+<script>
+  const bar = document.querySelector<HTMLElement>("[data-filters]");
+  const rows = document.querySelectorAll<HTMLElement>("[data-category]");
+
+  if (bar) {
+    bar.hidden = false;
+    bar.addEventListener("click", (event) => {
+      const button = (event.target as HTMLElement).closest<HTMLButtonElement>("[data-filter]");
+      if (!button) return;
+      const value = button.dataset.filter!;
+      bar.querySelectorAll("[data-filter]").forEach((b) => b.setAttribute("aria-pressed", String(b === button)));
+      rows.forEach((row) => {
+        row.hidden = value !== "All" && !row.dataset.category!.split("|").includes(value);
+      });
+    });
+  }
+</script>

@@ -1,0 +1,25 @@
+---
+import { howIWork } from "../../data/site";
+import SectionLabel from "../ui/SectionLabel.astro";
+---
+
+<section class="mx-auto w-full max-w-6xl px-6 py-24 md:px-10 md:py-32">
+  <SectionLabel index="02" name="HOW I WORK" />
+  <ol
+    class="relative mt-14 grid gap-10 border-l border-accent pl-8 lg:grid-cols-4 lg:gap-8 lg:border-l-0 lg:border-t lg:pl-0 lg:pt-8"
+  >
+    {
+      howIWork.map((step, i) => (
+        <li class="relative">
+          <span
+            aria-hidden="true"
+            class="absolute -left-[39px] top-1.5 size-3.5 rounded-full bg-accent ring-4 ring-ink-950 lg:-top-[39px] lg:left-0"
+          />
+          <p class="font-mono text-xs tabular-nums text-accent">{String(i + 1).padStart(2, "0")}</p>
+          <h3 class="mt-2 text-lg font-semibold tracking-[-0.02em]">{step.title}</h3>
+          <p class="mt-2 text-muted">{step.body}</p>
+        </li>
+      ))
+    }
+  </ol>
+</section>

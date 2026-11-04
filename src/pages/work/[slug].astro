@@ -1,20 +1,228 @@
 ---
-import { getCollection, render } from "astro:content";
+import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import Card from "../../components/ui/Card.astro";
+import Pill from "../../components/ui/Pill.astro";
+import MetricBadge from "../../components/ui/MetricBadge.astro";
+import ArrowLink from "../../components/ui/ArrowLink.astro";
+import SectionLabel from "../../components/ui/SectionLabel.astro";
+import FlowDiagram from "../../components/diagrams/FlowDiagram.astro";
+import LatencyBar from "../../components/diagrams/LatencyBar.astro";
+import { pushBefore, pushAfter, attendanceAfter, forYouAfter, cfErpAfter } from "../../components/diagrams/specs";
+import type { FlowSpec } from "../../components/diagrams/specs";
 
 export async function getStaticPaths() {
-  const work = await getCollection("work");
-  return work.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+  const work = (await getCollection("work")).sort((a, b) => a.data.order - b.data.order);
+  return work.map((entry, i) => ({
+    params: { slug: entry.id },
+    props: { entry, next: work[(i + 1) % work.length] },
+  }));
 }
 
-const { entry } = Astro.props;
-const { Content } = await render(entry);
+const { entry, next } = Astro.props;
+const { data } = entry;
+
+const diagrams: Record<
+  string,
+  { before?: { spec: FlowSpec; caption: string }; after: { spec: FlowSpec; caption: string } }
+> = {
+  "push-pipeline": {
+    before: {
+      spec: pushBefore,
+      caption:
+        "Before: requests hit one API that loops over users. The request blocks and Firebase answers with 429 Too Many Requests.",
+    },
+    after: {
+      spec: pushAfter,
+      caption:
+        "After: the API stores the job in a Redis queue and answers 202 Scheduled. Celery workers, backed by PostgreSQL, drain the queue and send to Firebase. Workers scale with load.",
+    },
+  },
+  "attendance-backend": {
+    after: {
+      spec: attendanceAfter,
+      caption:
+        "A terminal pushes to the PUSH receiver. One transaction stores an immutable raw event and a work item. A single advisory-locked worker turns it into a daily result, which feeds 7 reports. Bounded retry, crash recovery and a heartbeat protect the worker.",
+    },
+  },
+  "for-you": {
+    after: {
+      spec: forYouAfter,
+      caption:
+        "Search, view, cart, order and category signals, plus an admin boost, feed one hybrid score. The score orders the feed that one API serves to web and mobile.",
+    },
+  },
+  "cf-erp": {
+    after: {
+      spec: cfErpAfter,
+      caption:
+        "Jobs, vouchers, billing, accounts and HR are separate modules. A voucher posts an entry, and Ledger, Journal and Contra all derive from that same posted entry, so they agree.",
+    },
+  },
+};
+const diagram = diagrams[entry.id];
+
+// Decisions read "Lead: rest". Show the lead in bold when there is one.
+const splitDecision = (text: string) => {
+  const i = text.indexOf(": ");
+  return i === -1 ? { lead: null, rest: text } : { lead: text.slice(0, i), rest: text.slice(i + 2) };
+};
+
+const wide = "mx-auto w-full max-w-6xl px-6 md:px-10";
+const prose = "max-w-[65ch]";
 ---
 
-<BaseLayout title={entry.data.title}>
-  <section class="mx-auto w-full max-w-6xl px-6 py-24 md:px-10 md:py-32">
-    <h1 class="text-4xl font-semibold tracking-tight">{entry.data.title}</h1>
-    <p class="mt-4 text-muted">{entry.data.tagline}</p>
-    <Content />
-  </section>
+<BaseLayout title={data.title}>
+  <article>
+    <header class:list={[wide, "pt-16 md:pt-24"]}>
+      <p class="font-mono text-xs uppercase tracking-[0.18em]">
+        <a href="/work" class="text-accent hover:text-text focus-visible:text-text">Work</a>
+      </p>
+      <h1 class="mt-6 text-4xl font-semibold tracking-[-0.02em] md:text-5xl">{data.title}</h1>
+      <p class:list={["mt-4 text-lg text-muted", prose]}>{data.tagline}</p>
+
+      <Card class="mt-10">
+        <dl class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div>
+            <dt class="font-mono text-xs uppercase tracking-wide text-muted">Role</dt>
+            <dd class="mt-2">{data.role}</dd>
+          </div>
+          {
+            data.status && (
+              <div>
+                <dt class="font-mono text-xs uppercase tracking-wide text-muted">Status</dt>
+                <dd class="mt-2">{data.status}</dd>
+              </div>
+            )
+          }
+          {
+            data.device && (
+              <div>
+                <dt class="font-mono text-xs uppercase tracking-wide text-muted">Device</dt>
+                <dd class="mt-2">{data.device}</dd>
+              </div>
+            )
+          }
+          <div>
+            <dt class="font-mono text-xs uppercase tracking-wide text-muted">Metric</dt>
+            <dd class="mt-2"><MetricBadge>{data.metric}</MetricBadge></dd>
+          </div>
+          <div class="sm:col-span-2 lg:col-span-4">
+            <dt class="font-mono text-xs uppercase tracking-wide text-muted">Stack</dt>
+            <dd class="mt-2">
+              <ul class="flex flex-wrap gap-2">
+                {data.stack.map((s) => <li><Pill>{s}</Pill></li>)}
+              </ul>
+            </dd>
+          </div>
+        </dl>
+      </Card>
+    </header>
+
+    {
+      data.context && (
+        <section class:list={[wide, "pt-20"]}>
+          <SectionLabel name="Context" />
+          <p class:list={["mt-4 text-muted", prose]}>{data.context}</p>
+        </section>
+      )
+    }
+
+    {
+      data.problem && (
+        <section class:list={[wide, "pt-20"]}>
+          <SectionLabel name="The problem" />
+          <p class:list={["mt-4 text-muted", prose]}>{data.problem}</p>
+          {diagram?.before && (
+            <FlowDiagram
+              id={`${entry.id}-before`}
+              spec={diagram.before.spec}
+              caption={diagram.before.caption}
+              showCaption
+              scroll
+              class="mt-10"
+            />
+          )}
+        </section>
+      )
+    }
+
+    {
+      data.problems && (
+        <section class:list={[wide, "pt-20"]}>
+          <SectionLabel name="Problems and answers" />
+          <ul class="mt-6 divide-y divide-line border-y border-line">
+            {data.problems.map((p) => (
+              <li class="grid gap-1 py-4 md:grid-cols-[18rem_1fr] md:gap-8">
+                <p class="font-semibold">{p.problem}</p>
+                <p class="text-muted">{p.answer}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    <section class:list={[wide, "pt-20"]}>
+      <SectionLabel name="The design" />
+      <p class:list={["mt-4 text-muted", prose]}>{data.design}</p>
+      <FlowDiagram
+        id={`${entry.id}-after`}
+        spec={diagram.after.spec}
+        caption={diagram.after.caption}
+        showCaption
+        scroll
+        class="mt-10"
+      />
+    </section>
+
+    {
+      data.alsoCovers && (
+        <section class:list={[wide, "pt-20"]}>
+          <SectionLabel name="Also on this page" />
+          <p class:list={["mt-4 text-muted", prose]}>{data.alsoCovers}</p>
+          <div class="mt-8 max-w-xl">
+            <LatencyBar />
+          </div>
+        </section>
+      )
+    }
+
+    <section class:list={[wide, "pt-20"]}>
+      <SectionLabel name="Key decisions" />
+      <ul class="mt-6 grid gap-6 md:grid-cols-3">
+        {
+          data.decisions.map((d) => {
+            const { lead, rest } = splitDecision(d);
+            return (
+              <li>
+                <Card class="h-full">
+                  <p class="text-muted">
+                    {lead && <strong class="font-semibold text-text">{lead}: </strong>}
+                    {rest}
+                  </p>
+                </Card>
+              </li>
+            );
+          })
+        }
+      </ul>
+    </section>
+
+    {
+      data.result && (
+        <section class:list={[wide, "pt-20"]}>
+          <SectionLabel name="Result" />
+          <p class:list={["mt-4 text-muted", prose]}>{data.result}</p>
+        </section>
+      )
+    }
+
+    <section class:list={[wide, "py-24"]}>
+      <SectionLabel name="Next case study" />
+      <p class="mt-4 text-2xl font-semibold tracking-[-0.02em]">
+        <ArrowLink href={`/work/${next.id}`}>{next.data.title}</ArrowLink>
+      </p>
+    </section>
+  </article>
 </BaseLayout>

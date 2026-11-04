@@ -1,0 +1,28 @@
+---
+interface Props {
+  href: string;
+  external?: boolean;
+  newTab?: boolean;
+  class?: string;
+}
+
+const { href, external = false, newTab = false, class: className } = Astro.props;
+const nudge = external
+  ? "group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-focus-visible:-translate-y-0.5 group-focus-visible:translate-x-0.5"
+  : "group-hover:translate-x-0.5 group-focus-visible:translate-x-0.5";
+---
+
+<a
+  href={href}
+  target={newTab ? "_blank" : undefined}
+  rel={newTab ? "noopener" : undefined}
+  class:list={["group inline-flex items-center gap-1 text-accent hover:text-text focus-visible:text-text", className]}
+>
+  <slot />
+  <span
+    aria-hidden="true"
+    class:list={["inline-block transition-transform motion-reduce:transition-none", nudge]}
+  >
+    {external ? "↗" : "→"}
+  </span>
+</a>

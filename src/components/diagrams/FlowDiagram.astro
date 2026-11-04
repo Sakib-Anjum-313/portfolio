@@ -1,0 +1,166 @@
+---
+import type { FlowSpec, FlowNode, Tone } from "./specs";
+
+interface Props {
+  id: string;
+  spec: FlowSpec;
+  caption: string;
+  /** Show the caption as visible text; otherwise it is screen-reader only. */
+  showCaption?: boolean;
+  /** Let wide diagrams scroll sideways on narrow screens instead of shrinking the labels. */
+  scroll?: boolean;
+  class?: string;
+}
+
+const { id, spec, caption, showCaption = false, scroll = false, class: className } = Astro.props;
+
+type Box = Required<Pick<FlowNode, "x" | "y" | "w" | "h">> & FlowNode;
+const nodes: Box[] = spec.nodes.map((n) => ({ w: 120, h: 44, ...n }));
+const byId = Object.fromEntries(nodes.map((n) => [n.id, n]));
+
+const strokeByTone: Record<Tone, string> = {
+  default: "stroke-line",
+  system: "stroke-accent",
+  ok: "stroke-ok",
+  wait: "stroke-wait",
+  fail: "stroke-fail",
+};
+
+const noteFill = {
+  muted: "fill-muted",
+  text: "fill-text",
+  accent: "fill-accent",
+  ok: "fill-ok",
+  wait: "fill-wait",
+  fail: "fill-fail",
+};
+
+function edgePath(a: Box, b: Box, route?: "top") {
+  const acx = a.x + a.w / 2;
+  const bcx = b.x + b.w / 2;
+  const acy = a.y + a.h / 2;
+  const bcy = b.y + b.h / 2;
+
+  if (route === "top") {
+    const ty = Math.min(a.y, b.y) - 32;
+    return `M${acx} ${a.y} V${ty} H${bcx} V${b.y}`;
+  }
+  if (b.x >= a.x + a.w || b.x + b.w <= a.x) {
+    const rightward = b.x >= a.x + a.w;
+    const x1 = rightward ? a.x + a.w : a.x;
+    const x2 = rightward ? b.x : b.x + b.w;
+    if (acy === bcy) return `M${x1} ${acy} H${x2}`;
+    const mx = (x1 + x2) / 2;
+    return `M${x1} ${acy} H${mx} V${bcy} H${x2}`;
+  }
+  const down = b.y >= a.y + a.h;
+  const y1 = down ? a.y + a.h : a.y;
+  const y2 = down ? b.y : b.y + b.h;
+  if (acx === bcx) return `M${acx} ${y1} V${y2}`;
+  const my = (y1 + y2) / 2;
+  return `M${acx} ${y1} V${my} H${bcx} V${y2}`;
+}
+
+const edges = spec.edges.map((e) => ({
+  ...e,
+  d: edgePath(byId[e.from], byId[e.to], e.route),
+}));
+
+const markerId = `${id}-arrow`;
+---
+
+<figure
+  class:list={["m-0", className]}
+  style={scroll ? `max-width:${Math.round(spec.width * 1.4)}px` : undefined}
+>
+  <div class:list={[scroll && "overflow-x-auto"]}>
+    <svg
+      viewBox={`0 0 ${spec.width} ${spec.height}`}
+      class="block h-auto w-full"
+      style={scroll ? `min-width:${spec.width}px` : undefined}
+      aria-hidden="true"
+    >
+      <defs>
+        <marker
+          id={markerId}
+          viewBox="0 0 8 8"
+          refX="7"
+          refY="4"
+          markerWidth="8"
+          markerHeight="8"
+          orient="auto"
+        >
+          <path d="M0 0 L8 4 L0 8 z" class="fill-accent"></path>
+        </marker>
+      </defs>
+
+      {
+        edges.map((e) => (
+          <path
+            data-part="edge"
+            data-from={e.from}
+            data-to={e.to}
+            d={e.d}
+            fill="none"
+            stroke-width="1.25"
+            class={e.tone === "fail" ? "stroke-fail" : "stroke-accent"}
+            stroke-dasharray={e.tone === "fail" ? "4 4" : undefined}
+            marker-end={e.tone === "fail" && !e.route ? undefined : `url(#${markerId})`}
+          />
+        ))
+      }
+
+      {
+        nodes.map((n) => (
+          <g data-part="node" data-node={n.id}>
+            <rect
+              x={n.x}
+              y={n.y}
+              width={n.w}
+              height={n.h}
+              rx="8"
+              stroke-width="1.25"
+              class:list={["fill-ink-900", strokeByTone[n.tone ?? "default"]]}
+            />
+            <text
+              x={n.x + n.w / 2}
+              y={n.y + n.h / 2 + (n.sub ? -2 : 4)}
+              text-anchor="middle"
+              font-size="12"
+              class="fill-text font-mono"
+            >
+              {n.label}
+            </text>
+            {n.sub && (
+              <text
+                x={n.x + n.w / 2}
+                y={n.y + n.h / 2 + 13}
+                text-anchor="middle"
+                font-size="12"
+                class="fill-muted font-mono"
+              >
+                {n.sub}
+              </text>
+            )}
+          </g>
+        ))
+      }
+
+      {
+        (spec.notes ?? []).map((t) => (
+          <text
+            data-part="note"
+            x={t.x}
+            y={t.y}
+            text-anchor={t.anchor ?? "start"}
+            font-size="12"
+            class:list={["font-mono", noteFill[t.tone ?? "muted"], t.strike && "line-through"]}
+          >
+            {t.text}
+          </text>
+        ))
+      }
+    </svg>
+  </div>
+  <figcaption class:list={showCaption ? "mt-3 text-sm text-muted" : "sr-only"}>{caption}</figcaption>
+</figure>
