@@ -1,0 +1,158 @@
+---
+import "@fontsource-variable/inter";
+import "@fontsource-variable/jetbrains-mono";
+import "../styles/global.css";
+
+interface Props {
+  title?: string;
+}
+
+const { title } = Astro.props;
+const pageTitle = title ? `${title} · Sakib Anjum` : "Sakib Anjum";
+
+const email = "sakibanjum.313@gmail.com";
+const linkedin = "https://linkedin.com/in/sakib-anjum-cse";
+const github = "https://github.com/Sakib-Anjum-313";
+const resume = "/Sakib_Anjum_Resume.pdf";
+
+const navLinks = [
+  { label: "Work", href: "/work" },
+  { label: "Experience", href: "/experience" },
+  { label: "AI Workflow", href: "/ai-workflow" },
+];
+
+const path = Astro.url.pathname.replace(/\/$/, "");
+const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`);
+
+const linkClass =
+  "text-muted transition-colors hover:text-text focus-visible:text-text aria-[current=page]:text-accent";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <title>{pageTitle}</title>
+  </head>
+  <body class="flex min-h-screen flex-col">
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-lg focus:bg-accent focus:px-4 focus:py-2 focus:text-ink-950"
+    >
+      Skip to content
+    </a>
+
+    <header class="border-b border-line bg-ink-950/80 backdrop-blur">
+      <nav
+        aria-label="Primary"
+        class="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-8 gap-y-2 px-6 py-4 md:px-10"
+      >
+        <a
+          href="/"
+          class="font-semibold tracking-tight text-text"
+          aria-current={path === "" ? "page" : undefined}
+        >
+          Sakib Anjum
+        </a>
+        <ul class="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm">
+          {
+            navLinks.map((link) => (
+              <li>
+                <a
+                  href={link.href}
+                  class={linkClass}
+                  aria-current={isCurrent(link.href) ? "page" : undefined}
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))
+          }
+          <li>
+            <a
+              href={resume}
+              target="_blank"
+              rel="noopener"
+              class="text-muted transition-colors hover:text-text focus-visible:text-text"
+            >
+              Resume ↗
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main" class="flex-1">
+      <slot />
+    </main>
+
+    <footer class="border-t border-line bg-ink-950">
+      <div
+        class="mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 py-12 md:px-10"
+      >
+        <div class="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm">
+          <a
+            href={`mailto:${email}`}
+            class="font-mono text-text transition-colors hover:text-accent focus-visible:text-accent"
+          >
+            {email}
+          </a>
+          <button
+            type="button"
+            data-copy-email={email}
+            class="rounded-full border border-line px-4 py-1 text-sm text-muted transition-colors hover:border-accent/40 hover:text-text focus-visible:border-accent/40 focus-visible:text-text"
+          >
+            Copy email
+          </button>
+          <a
+            href={linkedin}
+            class="text-muted transition-colors hover:text-text focus-visible:text-text"
+          >
+            LinkedIn ↗
+          </a>
+          <a
+            href={github}
+            class="text-muted transition-colors hover:text-text focus-visible:text-text"
+          >
+            GitHub ↗
+          </a>
+          <a
+            href={resume}
+            target="_blank"
+            rel="noopener"
+            class="text-muted transition-colors hover:text-text focus-visible:text-text"
+          >
+            Resume ↗
+          </a>
+        </div>
+        <p class="text-sm text-muted">
+          Experience layout inspired by <a
+            href="https://brittanychiang.com"
+            class="text-text underline decoration-line underline-offset-4 transition-colors hover:decoration-accent focus-visible:decoration-accent"
+            >Brittany Chiang</a
+          >.
+        </p>
+      </div>
+    </footer>
+
+    <script>
+      document
+        .querySelectorAll<HTMLButtonElement>("[data-copy-email]")
+        .forEach((button) => {
+          button.addEventListener("click", async () => {
+            try {
+              await navigator.clipboard.writeText(button.dataset.copyEmail ?? "");
+              button.textContent = "Copied";
+              setTimeout(() => (button.textContent = "Copy email"), 2000);
+            } catch {
+              button.textContent = "Copy failed";
+            }
+          });
+        });
+    </script>
+  </body>
+</html>
