@@ -69,7 +69,8 @@ const { sectionClass } = Astro.props;
     <div class="space-y-5 p-5 font-mono text-sm leading-relaxed">
       <p>
         <span class="text-accent">AI</span>
-        <span data-part="claim" class="text-muted line-through decoration-fail decoration-2">{theCatch.claim}</span>
+        <!-- SplitText labels what it splits, and a role-less span can't carry a label. -->
+        <span data-part="claim" role="group" class="text-muted line-through decoration-fail decoration-2">{theCatch.claim}</span>
       </p>
       <p data-part="challenge">
         <span class="text-accent">Me</span>

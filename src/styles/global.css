@@ -50,6 +50,11 @@
   }
 }
 
+/* Controls that do nothing without a script. Decided by the class set in <head>, so showing them never shifts the page. */
+html:not(.js) [data-needs-js] {
+  display: none;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   /* Holds on-screen scene content for the first paint, so it never flashes before its entrance.
      The failsafe shows it anyway if the script is slow or fails. */

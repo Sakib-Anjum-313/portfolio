@@ -24,7 +24,7 @@ const previews: Record<string, FlowSpec> = {
       Systems I designed and built, and the problems they solved.
     </p>
 
-    <div data-filters hidden class="mt-10 flex flex-wrap gap-2" role="group" aria-label="Filter by category">
+    <div data-filters data-needs-js class="mt-10 flex flex-wrap gap-2" role="group" aria-label="Filter by category">
       {
         filters.map((f) => (
           <button
@@ -50,7 +50,10 @@ const previews: Record<string, FlowSpec> = {
               >
                 <p class="font-mono text-sm tabular-nums text-muted">{String(i + 1).padStart(2, "0")}</p>
                 <div>
-                  <h2 class="text-2xl font-semibold tracking-[-0.02em] group-hover:text-accent group-focus-visible:text-accent">
+                  <h2
+                    transition:name={`work-title-${entry.id}`}
+                    class="text-2xl font-semibold tracking-[-0.02em] group-hover:text-accent group-focus-visible:text-accent"
+                  >
                     {entry.data.title}
                   </h2>
                   <p class="mt-2 max-w-[65ch] text-muted">{entry.data.tagline}</p>
@@ -105,7 +108,6 @@ const previews: Record<string, FlowSpec> = {
     const bar = q("[data-filters]")[0];
     const rows = q("[data-category]");
     const buttons = q("[data-filter]");
-    bar.hidden = false;
 
     const mm = gsap.matchMedia();
 
@@ -209,9 +211,6 @@ const previews: Record<string, FlowSpec> = {
       };
     });
 
-    return () => {
-      mm.revert();
-      bar.hidden = true;
-    };
+    return () => mm.revert();
   });
 </script>

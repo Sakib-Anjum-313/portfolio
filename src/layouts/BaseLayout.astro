@@ -2,6 +2,8 @@
 import "@fontsource-variable/inter";
 import "@fontsource-variable/jetbrains-mono";
 import "../styles/global.css";
+import interLatin from "@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url";
+import { ClientRouter } from "astro:transitions";
 import { site, nav as navLinks } from "../data/site";
 import CopyEmail from "../components/ui/CopyEmail.astro";
 
@@ -30,8 +32,13 @@ const linkClass =
     <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png" />
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <title>{pageTitle}</title>
+    <!-- The headline's height changes when Inter swaps in, so have it ready for first paint. -->
+    <link rel="preload" href={interLatin} as="font" type="font/woff2" crossorigin />
+    <ClientRouter />
     <script is:inline>
       document.documentElement.classList.add("js");
+      // ClientRouter replaces the <html> attributes on every navigation.
+      document.addEventListener("astro:after-swap", () => document.documentElement.classList.add("js"));
     </script>
   </head>
   <body class="flex min-h-screen flex-col">

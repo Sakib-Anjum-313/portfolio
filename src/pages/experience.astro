@@ -164,17 +164,38 @@ const navItems = [
         });
       };
 
-      links.forEach((link, i) => {
-        const section = q(link.getAttribute("href")!)[0];
+      const sections = links.map((link) => q(link.getAttribute("href")!)[0]);
+      // Mid-viewport, or the page end for sections that can never scroll that far.
+      const reach = (section: HTMLElement) =>
+        Math.min(
+          section.getBoundingClientRect().top + window.scrollY - window.innerHeight / 2,
+          ScrollTrigger.maxScroll(window) - 1
+        );
+
+      // A click says which section is wanted, so the triggers the jump crosses can't overrule it.
+      let holdUntil = 0;
+      const follow = (index: number) => {
+        if (performance.now() >= holdUntil) setActive(index);
+      };
+      const clicks = links.map((_, i) => () => {
+        holdUntil = performance.now() + 300;
+        setActive(i);
+      });
+      links.forEach((link, i) => link.addEventListener("click", clicks[i]));
+
+      sections.forEach((section, i) => {
+        const next = sections[i + 1];
+        // The ranges touch, so an anchor jump always lands inside exactly one of them.
         ScrollTrigger.create({
           trigger: section,
-          start: "top 50%",
-          end: "bottom 50%",
+          start: () => reach(section),
+          // A trigger stops being active at its exact end, so the last one ends just past the page.
+          end: () => (next ? reach(next) : ScrollTrigger.maxScroll(window) + 1),
           onToggle: (self) => {
-            if (self.isActive) setActive(i);
+            if (self.isActive) follow(i);
           },
           onLeaveBack: () => {
-            if (i === 0) setActive(-1);
+            if (i === 0) follow(-1);
           },
         });
       });
@@ -192,7 +213,10 @@ const navItems = [
         });
       }
 
-      return () => setActive(-1);
+      return () => {
+        links.forEach((link, i) => link.removeEventListener("click", clicks[i]));
+        setActive(-1);
+      };
     });
 
     return () => {

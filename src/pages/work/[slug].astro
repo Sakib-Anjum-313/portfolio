@@ -60,7 +60,9 @@ const prose = "max-w-[65ch]";
       <p class="font-mono text-xs uppercase tracking-[0.18em]">
         <a href="/work" class="text-accent hover:text-text focus-visible:text-text">Work</a>
       </p>
-      <h1 class="mt-6 text-4xl font-semibold tracking-[-0.02em] md:text-5xl">{data.title}</h1>
+      <h1 transition:name={`work-title-${entry.id}`} class="mt-6 text-4xl font-semibold tracking-[-0.02em] md:text-5xl">
+        {data.title}
+      </h1>
       <p class:list={["mt-4 text-lg text-muted", prose]}>{data.tagline}</p>
 
       <Card class="mt-10">
