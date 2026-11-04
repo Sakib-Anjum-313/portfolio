@@ -79,7 +79,7 @@ const linkClass =
       </nav>
     </header>
 
-    <main id="main" class="flex-1">
+    <main id="main" class="flex-1" data-scene="reveal">
       <slot />
     </main>
 
@@ -120,3 +120,29 @@ const linkClass =
     </footer>
   </body>
 </html>
+
+<script>
+  import { gsap, MQ } from "../lib/gsap";
+  import { onScene } from "../lib/scene";
+
+  // Fade up section labels and titles once. Anything on screen at load stays as painted, so it never flashes.
+  onScene("reveal", (root) => {
+    const q = gsap.utils.selector(root);
+    const mm = gsap.matchMedia();
+
+    mm.add(MQ.motion, () => {
+      const targets = q("[data-reveal]").filter((el) => el.getBoundingClientRect().top >= window.innerHeight);
+
+      targets.forEach((el) => {
+        // opacity, not autoAlpha: hidden text would drop out of screen readers and find-in-page.
+        gsap.from(el, {
+          opacity: 0,
+          y: 16,
+          scrollTrigger: { trigger: el, start: "clamp(top 85%)", once: true },
+        });
+      });
+    });
+
+    return () => mm.revert();
+  });
+</script>

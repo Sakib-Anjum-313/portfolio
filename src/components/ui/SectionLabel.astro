@@ -9,6 +9,6 @@ interface Props {
 const { index, name, as: Tag = "h2", class: className } = Astro.props;
 ---
 
-<Tag class:list={["font-mono text-xs uppercase tracking-[0.18em] text-accent", className]}>
+<Tag data-reveal class:list={["font-mono text-xs uppercase tracking-[0.18em] text-accent", className]}>
   {index ? `${index} / ${name}` : name}
 </Tag>

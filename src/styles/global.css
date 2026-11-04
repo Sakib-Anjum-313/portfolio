@@ -49,3 +49,27 @@
     color: var(--color-text);
   }
 }
+
+@layer components {
+  /* Blueprint cursor (lib/cursor.ts): a brighter copy of the grid, masked to 180px around the pointer. */
+  .blueprint-cursor {
+    --bright: color-mix(in srgb, var(--color-accent) 30%, transparent);
+
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image:
+      linear-gradient(to right, var(--bright) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--bright) 1px, transparent 1px);
+    background-size: 32px 32px;
+    /* A mask reads alpha only, so the colour token here never shows. */
+    mask-image: radial-gradient(circle 180px at var(--x, 0) var(--y, 0), var(--color-accent), transparent);
+    opacity: 0;
+    transition: opacity 200ms;
+  }
+
+  .blueprint-cursor[data-active] {
+    opacity: 1;
+  }
+}
