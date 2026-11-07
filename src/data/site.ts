@@ -29,7 +29,7 @@ export const hero = {
 } as const;
 
 export const proof = [
-  { value: "5M+", label: "users reached by the push pipeline" },
+  { value: "2M+", label: "combined users reached by the push pipeline" },
   { value: "67%", label: "faster Order API (1.2s → 0.4s)" },
   { value: "150+", label: "staff on the C&F ERP" },
   { value: "4", label: "engineers led and mentored" },
@@ -55,7 +55,6 @@ export const howIWork = [
   },
 ] as const;
 
-// TODO(sakib): rewrite in your voice.
 export const about =
   "I learned early that software only works when it matches how people actually work. At Coders Lab I spent two months on a factory floor before building its ERP. At Govaly I lead a team of four engineers, and I build systems that stay correct when traffic spikes, devices go offline or data arrives twice. I use AI heavily, and I verify everything it produces.";
 

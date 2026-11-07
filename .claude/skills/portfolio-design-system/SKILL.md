@@ -59,7 +59,7 @@ Max line length for prose: 65ch.
 - `SectionLabel` — mono index + name: `02 / EXPERIENCE`.
 - `Card` — surface, 1px border, 8px radius, padding 24; optional `href` makes the whole card one link with a visible focus ring.
 - `Pill` — tech tag: mono 12px, accent text, accent background at 10%, rounded-full.
-- `MetricBadge` — one metric per role/project: `5M+ users`, mono, ok-coloured dot.
+- `MetricBadge` — one metric per role/project: `2M+ combined users`, mono, ok-coloured dot.
 - `MetricCounter` — big number + label; counts up once when in view.
 - `ArrowLink` — text + ↗ that nudges 2px up-right on hover.
 - `Button` — primary (accent bg, ink text) and ghost (border only). Max two per view.

@@ -28,7 +28,7 @@ Items marked `TODO(sakib)` are placeholders Sakib will refine later; build with 
 
 | Value | Label |
 | --- | --- |
-| 5M+ | users reached by the push pipeline |
+| 2M+ | combined users reached by the push pipeline |
 | 67% | faster Order API (1.2s → 0.4s) |
 | 150+ | staff on the C&F ERP |
 | 4 | engineers led and mentored |
@@ -46,10 +46,10 @@ Items marked `TODO(sakib)` are placeholders Sakib will refine later; build with 
 ### Govaly Pvt Ltd — Full Stack Software Engineer / Team Lead
 - **Dates:** Jul 2025 — Present
 - **Link:** https://govaly.com.bd
-- **Metric badge:** 5M+ users
+- **Metric badge:** 2M+ combined users
 - **Summary:** Lead a team of 4 on Govaly, a multi-vendor e-commerce marketplace, and on client ERP systems. Main lead for the mobile app and customer website (homepage, search, category and profile pages). Own architecture, releases and production.
 - **Highlights:**
-  - Re-architected push notifications for a 5M+ user base into an async Redis / Celery queue pipeline.
+  - Re-architected push notifications for a 2M+ combined user base into an async Redis / Celery queue pipeline.
   - Built the "For You" hybrid recommendation engine for web and mobile.
   - Cut Order API response time ~67% (1.2s → 0.4s).
   - Architected the C&F ERP and its biometric attendance backend for Standard Freight Incorporation (150+ staff).
@@ -80,12 +80,12 @@ Items marked `TODO(sakib)` are placeholders Sakib will refine later; build with 
 Order on the Work page: push-pipeline, attendance-backend, for-you, cf-erp. The Order API speed-up is a short section inside push-pipeline and on Home (latency bar), not its own page. Key decisions below are drafts: `TODO(sakib)` confirm wording.
 
 ### 1. push-pipeline — Push Notification Pipeline
-- **Tagline:** Notifications for 5M+ users without taking the server down.
+- **Tagline:** Notifications for 2M+ combined users without taking the server down.
 - **Role:** Designed and built · **Stack:** Python, Celery, Redis, PostgreSQL, Firebase Cloud Messaging
-- **Metric:** 5M+ users
+- **Metric:** 2M+ combined users
 - **Problem:** Notifications were sent by looping over users inside the API request. Under heavy traffic the request blocked, the server sometimes crashed, and Firebase rejected bursts with too-many-requests errors.
 - **Design:** The API stores the job in a queue and immediately responds that the schedule is set. Celery workers on Redis, backed by PostgreSQL, drain the queue. Under heavy traffic, more workers are added; when it drops, workers are reduced.
-- **Result:** The API never blocks. A traffic spike makes the queue longer instead of crashing the server. `TODO(sakib)`: add send time or messages per minute.
+- **Result:** The API never blocks. A traffic spike makes the queue longer instead of crashing the server.
 - **Key decisions (draft):**
   - A queue instead of more servers: cheaper, and it absorbs spikes instead of failing under them.
   - Respond first, send later: the caller gets an answer in milliseconds regardless of audience size.
@@ -95,7 +95,7 @@ Order on the Work page: push-pipeline, attendance-backend, for-you, cf-erp. The 
 ### 2. attendance-backend — Biometric Attendance Backend
 - **Tagline:** Hardware is unreliable and HR data is evidence. Every step is replayable, auditable and safe to retry.
 - **Role:** Designed the architecture and backend · **Stack:** FastAPI, PostgreSQL, Alembic, Nginx, AWS EC2 · **Device:** ZKTeco SenseFace 2A
-- **Status:** MVP built; hardware certification in progress. `TODO(sakib)`: update when live.
+- **Status:** In production.
 - **Metric:** Direct device integration, no vendor middleware
 - **Problems and answers:**
   - Device re-sends the same upload → exact replays deduplicated; device gets OK only after the batch commits.
@@ -117,7 +117,6 @@ Order on the Work page: push-pipeline, attendance-backend, for-you, cf-erp. The 
 - **Metric:** Hybrid ranking
 - **Problem (draft):** Every shopper saw the same home page and category order, and merchandising had no way to promote products to the right people.
 - **Design:** Hybrid scoring from recent searches, product views, cart, orders and category affinity, plus admin-boosted products. One API serves web and mobile.
-- **Result:** `TODO(sakib)`: add CTR or share of orders from the feed.
 - **Key decisions (draft):**
   - Transparent scoring over ML: works from day one and can be tuned by the business.
   - Admin boost built in, so merchandising and personalization work together.

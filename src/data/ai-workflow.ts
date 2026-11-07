@@ -3,7 +3,6 @@ export const aiWorkflow = {
   headline: "AI writes code. I own the outcome.",
   subline:
     "I use Claude Code and Codex every day, inside a workflow built so that generated code fits the existing system and nothing merges unverified.",
-  // TODO(sakib): change to "Certified" + month/year and credential link when passed.
   certification: "Claude Certified Architect: Foundations — in progress",
   teamAngle:
     "Contributed significantly to building and improving this workflow at Govaly, and coaches the team of 4 on it.",
@@ -121,12 +120,8 @@ export const toolkit = [
   },
 ] as const;
 
-// TODO(sakib): confirm before listing: plan mode, subagents, hooks, MCP servers,
-// git worktrees for parallel agents, headless / CI agents.
-
 export const proofBuiltIn = {
   body: "This portfolio was built the same way: a CLAUDE.md, a written build plan, a content brief as the single source of truth, and project skills for the design system and animation patterns.",
   linkLabel: "See how this site was built",
-  // TODO(sakib): add the GitHub repo URL once public. Keep the link hidden until then.
   repoUrl: null as string | null,
 } as const;

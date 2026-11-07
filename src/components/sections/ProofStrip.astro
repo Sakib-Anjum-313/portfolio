@@ -33,7 +33,7 @@ import LatencyBar from "../scenes/LatencyBar.astro";
       const tl = gsap.timeline({ scrollTrigger: { trigger: root, start: "top 90%", once: true } });
 
       counters.forEach((el, i) => {
-        // "5M+" counts the 5 and keeps the "M+".
+        // "2M+" counts the 2 and keeps the "M+".
         const [, digits, suffix] = finals[i].match(/^(\d+)(.*)$/) ?? [];
         const count = { value: 0 };
         el.textContent = `0${suffix}`;

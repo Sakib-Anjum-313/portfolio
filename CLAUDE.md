@@ -33,7 +33,7 @@ Work like a careful senior engineer. Speed never beats correctness.
 
 **While building**
 6. One small step at a time. Build and check after each step, not at the end.
-7. Copy text exactly from `docs/content-brief.md`: names, dates, numbers, punctuation, capitalization (e.g. "C&F ERP", "SenseFace 2A", "1.2s → 0.4s", "5M+"). Never round, reword or "improve" facts.
+7. Copy text exactly from `docs/content-brief.md`: names, dates, numbers, punctuation, capitalization (e.g. "C&F ERP", "SenseFace 2A", "1.2s → 0.4s", "2M+"). Never round, reword or "improve" facts.
 8. Use only design tokens from `portfolio-design-system`. No hard-coded colours, fonts or spacing outside the scale.
 9. Follow the `astro-gsap-scenes` template exactly for every animation: shared `lib/gsap.ts`, `onScene`, `gsap.matchMedia`, final-state markup, cleanup.
 10. Don't touch files outside the current task. Don't add dependencies the plan doesn't list without asking.
